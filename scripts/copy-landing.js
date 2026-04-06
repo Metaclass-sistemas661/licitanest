@@ -5,7 +5,7 @@
  * - Reescreve ../public/ → / nos HTML (assets já estão na raiz do dist via Vite)
  * - landing/login.html redireciona para /login (SPA)
  */
-import { cpSync, renameSync, writeFileSync, existsSync, readdirSync, readFileSync } from "fs";
+import { cpSync, renameSync, existsSync, readdirSync, readFileSync, writeFileSync, unlinkSync } from "fs";
 import { resolve, dirname, extname } from "path";
 import { fileURLToPath } from "url";
 
@@ -42,16 +42,14 @@ function fixAssetPaths(dir) {
 fixAssetPaths(dist);
 console.log("✓ ../public/ → / em todos os HTML da landing");
 
-// 3. Substituir login.html por redirect para /login (SPA)
-writeFileSync(
-  resolve(dist, "login.html"),
-  `<!DOCTYPE html>
-<html><head><meta http-equiv="refresh" content="0;url=/login"></head>
-<body><a href="/login">Entrar</a></body></html>`
-);
-console.log("✓ dist/login.html → redirect para /login");
+// 4. Remover login.html do dist (o Firebase rewrite /login → /app.html cuida disso)
+const loginHtml = resolve(dist, "login.html");
+if (existsSync(loginHtml)) {
+  unlinkSync(loginHtml);
+  console.log("✓ dist/login.html removido (rewrite Firebase cuida de /login)");
+}
 
-// 4. Criar redirects para outras páginas estáticas da landing que o SPA não tem
+// 5. Verificar páginas estáticas da landing
 const landingPages = [
   "contato.html",
   "politica-de-privacidade.html",

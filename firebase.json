@@ -2,6 +2,7 @@
   "hosting": {
     "target": "licitanest",
     "public": "dist",
+    "cleanUrls": false,
     "ignore": [
       "firebase.json",
       "**/.*",
