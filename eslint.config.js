@@ -14,6 +14,7 @@ export default [
       "supabase/**",
       "api/node_modules/**",
       "api/dist/**",
+      "landing/**",
     ],
   },
 
