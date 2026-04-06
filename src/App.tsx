@@ -30,10 +30,10 @@ function lazyRetry<T extends Record<string, any>>(
           sessionStorage.setItem(key, String(retries + 1));
           // Purge the failed module from browser cache
           if ("caches" in window) {
-            caches.keys().then((names) =>
+            window.caches.keys().then((names) =>
               names.forEach((n) => {
                 if (n.includes("workbox-precache") || n.includes("precache")) {
-                  caches.open(n).then((cache) =>
+                  window.caches.open(n).then((cache) =>
                     cache.keys().then((reqs) =>
                       reqs.forEach((req) => {
                         if (req.url.includes(String(name))) cache.delete(req);

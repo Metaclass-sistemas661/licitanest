@@ -33,11 +33,11 @@ export class ErrorBoundary extends Component<Props, State> {
     if (isChunkError) {
       // Purge precache and reload automatically
       if ("caches" in window) {
-        caches.keys().then((names) =>
+        window.caches.keys().then((names) =>
           Promise.all(
             names
               .filter((n) => n.includes("precache") || n.includes("workbox"))
-              .map((n) => caches.delete(n)),
+              .map((n) => window.caches.delete(n)),
           ),
         ).then(() => location.reload());
         return;
