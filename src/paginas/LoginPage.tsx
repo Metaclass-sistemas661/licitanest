@@ -110,8 +110,8 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#1e3a8a] px-4 py-8">
-      <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="flex min-h-screen items-center justify-center bg-[#1e3a8a] p-4 sm:p-6">
+      <div className="flex w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl" style={{ minHeight: 'calc(100vh - 3rem)' }}>
         {/* ── Lado Esquerdo: Formulário ─────────────────── */}
         <div className="flex w-full flex-col justify-center px-8 py-10 sm:px-12 md:w-1/2">
           <div className="mx-auto w-full max-w-sm">
