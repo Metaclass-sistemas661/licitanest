@@ -48,8 +48,8 @@ export default defineConfig({
             },
           },
         ],
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/portal\/cotacao/, /^\/$/, /^\/contato/, /^\/politica/, /^\/termos/, /^\/preferencias/, /^\/canal-lgpd/],
+        navigateFallback: "/app.html",
+        navigateFallbackDenylist: [/^\/api/, /^\/portal\/cotacao/, /^\/$/, /^\/home\.html/, /^\/contato/, /^\/politica/, /^\/termos/, /^\/preferencias/, /^\/canal-lgpd/],
       },
       devOptions: {
         enabled: false,
