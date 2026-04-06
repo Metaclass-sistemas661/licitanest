@@ -9,8 +9,112 @@
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/login",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/recuperar-senha",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/redefinir-senha",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/onboarding",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/portal/**",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/catalogo",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/cestas/**",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/cotacoes/**",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/fornecedores",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/pesquisa-rapida",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/relatorios",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/configuracoes",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/painel-gestor",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/ajuda",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/comparador",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/templates-cestas",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/historico-precos",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/mapa-calor",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/alertas-preco",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/exportacao-sicom",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/sugestao-fontes-ia",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/ocr-cotacoes",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/billing",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/metricas-uso",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/notificacoes",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/api-publica",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/admin-metaclass",
+        "destination": "/app.html"
       }
     ],
     "headers": [
