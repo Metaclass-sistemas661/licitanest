@@ -11,6 +11,7 @@ import {
   LogOut,
   Scale,
   ChevronRight,
+  ChevronDown,
   Menu,
   X,
   Shield,
@@ -55,6 +56,7 @@ interface NavSection {
   items: NavItem[];
 }
 
+/* ── Itens do sidebar ESQUERDO (navegação principal) ── */
 const navSections: NavSection[] = [
   {
     title: "Geral",
@@ -83,11 +85,8 @@ const navSections: NavSection[] = [
       { to: "/relatorios", icon: FileBarChart2, label: "Relatórios" },
       { to: "/alertas-preco", icon: BellRing, label: "Alertas de Preço" },
       { to: "/exportacao-sicom", icon: FileOutput, label: "Exportação SICOM" },
-      { to: "/sugestao-fontes-ia", icon: Sparkles, label: "Sugestão com IA" },
       { to: "/ocr-cotacoes", icon: ScanLine, label: "OCR Cotações" },
       { to: "/configuracoes", icon: Settings, label: "Configurações", perfis: ["administrador"] },
-      { to: "/ajuda", icon: HelpCircle, label: "Ajuda & FAQ" },
-      { to: "/notificacoes", icon: BellDot, label: "Notificações Push" },
     ],
   },
   {
@@ -101,10 +100,22 @@ const navSections: NavSection[] = [
   },
 ];
 
+/* ── Itens do sidebar DIREITO (ações rápidas / utilitários) ── */
+const rightSidebarItems: NavItem[] = [
+  { to: "/sugestao-fontes-ia", icon: Sparkles, label: "IA Assistente" },
+  { to: "/ajuda", icon: HelpCircle, label: "Ajuda & FAQ" },
+  { to: "/notificacoes", icon: BellDot, label: "Notificações" },
+];
+
+/* ── Sidebar Esquerdo — Conteúdo com categorias colapsáveis ── */
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { servidor, perfil, logout } = useAuth();
+  const { perfil, logout } = useAuth();
   const navigate = useNavigate();
   const [saindo, setSaindo] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  const toggleSection = (title: string) =>
+    setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }));
 
   const handleLogout = async () => {
     setSaindo(true);
@@ -112,7 +123,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     navigate("/login", { replace: true });
   };
 
-  /** Filtra itens de navegação conforme perfil do usuário logado */
   const secoesFiltradas = navSections
     .map((section) => ({
       ...section,
@@ -121,6 +131,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       ),
     }))
     .filter((section) => section.items.length > 0);
+
   return (
     <>
       {/* Logo */}
@@ -136,68 +147,65 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="mx-4 h-px bg-sidebar-border" />
 
-      {/* Navigation — seções categorizadas com scroll */}
-      <nav data-tour="sidebar-nav" className="flex-1 space-y-4 overflow-y-auto px-3 py-4 scrollbar-thin">
-        {secoesFiltradas.map((section) => (
-          <div key={section.title}>
-            <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-muted">
-              {section.title}
-            </p>
-            <div className="space-y-0.5">
-              {section.items.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.to === "/"}
-                  onClick={onNavigate}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                      isActive
-                        ? "bg-sidebar-primary/15 text-sidebar-primary-foreground shadow-sm"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    )
-                  }
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                  {/* Indicador de item ativo */}
-                  <ChevronRight
-                    className={cn(
-                      "ml-auto h-3 w-3 shrink-0 opacity-0 transition-opacity",
-                      "group-[.active]:opacity-100",
-                    )}
-                  />
-                </NavLink>
-              ))}
+      {/* Navigation — seções colapsáveis com scroll */}
+      <nav data-tour="sidebar-nav" className="flex-1 space-y-1 overflow-y-auto px-3 py-4 scrollbar-thin">
+        {secoesFiltradas.map((section) => {
+          const isCollapsed = collapsed[section.title] ?? false;
+          return (
+            <div key={section.title}>
+              <button
+                onClick={() => toggleSection(section.title)}
+                className="flex w-full items-center justify-between px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-muted hover:text-sidebar-foreground transition-colors"
+              >
+                {section.title}
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 transition-transform duration-200",
+                    isCollapsed && "-rotate-90",
+                  )}
+                />
+              </button>
+              <div
+                className={cn(
+                  "space-y-0.5 overflow-hidden transition-all duration-200",
+                  isCollapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100",
+                )}
+              >
+                {section.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.to === "/"}
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-sidebar-primary/15 text-sidebar-primary-foreground shadow-sm"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      )
+                    }
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                    <ChevronRight
+                      className={cn(
+                        "ml-auto h-3 w-3 shrink-0 opacity-0 transition-opacity",
+                        "group-[.active]:opacity-100",
+                      )}
+                    />
+                  </NavLink>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="mx-4 h-px bg-sidebar-border" />
 
-      {/* Footer — Usuário + Sair */}
+      {/* Footer — Sair */}
       <div className="shrink-0 p-3">
-        {servidor && (
-          <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/20 text-[10px] font-bold text-white">
-              {servidor.nome
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")
-                .toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-white">{servidor.nome}</p>
-              <p className="flex items-center gap-1 text-[10px] text-sidebar-muted">
-                <Shield className="h-3 w-3" />
-                {perfil ? perfil.charAt(0).toUpperCase() + perfil.slice(1) : "—"}
-              </p>
-            </div>
-          </div>
-        )}
         <button
           onClick={handleLogout}
           disabled={saindo}
@@ -211,8 +219,8 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function AppLayout() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+/* ── Sidebar Direito — Ícones finos com tooltip ── */
+function RightSidebar() {
   const { servidor, perfil } = useAuth();
 
   const iniciais = servidor
@@ -224,9 +232,68 @@ export function AppLayout() {
         .toUpperCase()
     : "??";
 
+  const perfilLabel = perfil
+    ? perfil.charAt(0).toUpperCase() + perfil.slice(1)
+    : "—";
+
+  return (
+    <aside className="hidden w-14 flex-col items-center border-l bg-muted/30 py-4 lg:flex">
+      {/* Itens de ação rápida */}
+      <div className="flex flex-1 flex-col items-center gap-1">
+        {rightSidebarItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) =>
+              cn(
+                "group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+              )
+            }
+          >
+            <item.icon className="h-5 w-5" />
+            {/* Tooltip */}
+            <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-popover px-2 py-1 text-xs font-medium text-popover-foreground shadow-md border opacity-0 transition-opacity group-hover:opacity-100">
+              {item.label}
+            </span>
+          </NavLink>
+        ))}
+      </div>
+
+      {/* Perfil — botão inferior */}
+      <div className="flex flex-col items-center gap-2 border-t pt-3">
+        <NavLink
+          to="/configuracoes"
+          className={({ isActive }) =>
+            cn(
+              "group relative flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+              isActive
+                ? "ring-2 ring-primary"
+                : "hover:ring-2 hover:ring-accent",
+            )
+          }
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            <span className="text-[10px] font-semibold text-primary">{iniciais}</span>
+          </div>
+          {/* Tooltip */}
+          <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-popover px-2 py-1 text-xs font-medium text-popover-foreground shadow-md border opacity-0 transition-opacity group-hover:opacity-100">
+            {servidor?.nome ?? "Perfil"} · {perfilLabel}
+          </span>
+        </NavLink>
+      </div>
+    </aside>
+  );
+}
+
+export function AppLayout() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar Desktop */}
+      {/* Sidebar Esquerdo — Desktop */}
       <aside className="hidden w-64 flex-col bg-sidebar-background lg:flex">
         <SidebarContent />
       </aside>
@@ -246,7 +313,6 @@ export function AppLayout() {
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        {/* Botão fechar */}
         <button
           onClick={() => setMobileMenuOpen(false)}
           className="absolute right-3 top-4 rounded-lg p-1.5 text-sidebar-foreground hover:bg-sidebar-accent"
@@ -261,7 +327,6 @@ export function AppLayout() {
         {/* Top bar */}
         <header className="flex h-16 items-center justify-between border-b px-6">
           <div className="flex items-center gap-4">
-            {/* Hamburger mobile */}
             <Button
               variant="ghost"
               size="icon"
@@ -299,18 +364,6 @@ export function AppLayout() {
             <div data-tour="theme-toggle">
               <ThemeToggle />
             </div>
-
-            <div className="hidden flex-col items-end sm:flex">
-              <span className="text-sm font-medium">
-                {servidor?.nome || "Carregando..."}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {perfil ? perfil.charAt(0).toUpperCase() + perfil.slice(1) : "—"}
-              </span>
-            </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-              <span className="text-xs font-semibold text-primary">{iniciais}</span>
-            </div>
           </div>
         </header>
 
@@ -320,6 +373,9 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Sidebar Direito — Ícones com tooltip */}
+      <RightSidebar />
 
       {/* Command palette — abre com Ctrl/Cmd+K */}
       <CommandPalette />
