@@ -8,7 +8,7 @@ import prettierConfig from "eslint-config-prettier";
 export default [
   // Ignorar diretórios de build
   {
-    ignores: ["dist/**", "node_modules/**", "supabase/**"],
+    ignores: ["dist/**", "node_modules/**", "supabase/**", "api/**"],
   },
 
   // Configuração base JS
