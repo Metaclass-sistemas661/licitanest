@@ -15,6 +15,8 @@ export default [
       "api/node_modules/**",
       "api/dist/**",
       "landing/**",
+      "scripts/**",
+      "public/**",
     ],
   },
 
