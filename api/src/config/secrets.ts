@@ -1,20 +1,26 @@
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 
 const client = new SecretManagerServiceClient();
-const PROJECT_ID = process.env.GCP_PROJECT || "sistema-de-gestao-16e15";
+const PROJECT_ID = process.env.GCP_PROJECT_ID || process.env.GCP_PROJECT || "sistema-de-gestao-16e15";
 
 const cache = new Map<string, string>();
 
 export async function obterSecret(nome: string): Promise<string> {
   if (cache.has(nome)) return cache.get(nome)!;
 
-  const [version] = await client.accessSecretVersion({
-    name: `projects/${PROJECT_ID}/secrets/${nome}/versions/latest`,
-  });
+  try {
+    const [version] = await client.accessSecretVersion({
+      name: `projects/${PROJECT_ID}/secrets/${nome}/versions/latest`,
+    });
 
-  const valor = version.payload?.data?.toString() ?? "";
-  cache.set(nome, valor);
-  return valor;
+    const valor = version.payload?.data?.toString() ?? "";
+    cache.set(nome, valor);
+    return valor;
+  } catch (err) {
+    console.warn(`Secret "${nome}" não encontrado no Secret Manager. Usando valor vazio.`);
+    cache.set(nome, "");
+    return "";
+  }
 }
 
 export async function carregarSecrets(): Promise<{

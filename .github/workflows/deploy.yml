@@ -161,7 +161,6 @@ jobs:
           env_vars: |
             NODE_ENV=production
             GCP_PROJECT_ID=${{ env.GCP_PROJECT_ID }}
-            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
           flags: >-
             --allow-unauthenticated
             --memory=512Mi
@@ -169,6 +168,7 @@ jobs:
             --min-instances=0
             --max-instances=3
             --timeout=60s
+            --set-env-vars=^@^CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
             --add-cloudsql-instances=${{ env.GCP_PROJECT_ID }}:${{ env.GCP_REGION }}:licitanest-db
 
   # ─── Deploy Cloud Functions (main only) ─────────────────
