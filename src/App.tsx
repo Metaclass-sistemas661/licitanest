@@ -7,46 +7,66 @@ import { Toaster } from "sonner";
 import { PageLoader } from "@/componentes/ui/page-loader";
 import { PwaInstallBanner, PwaUpdateBanner, OfflineIndicator } from "@/componentes/pwa";
 
+/* ── Retry wrapper for lazy imports (handles stale SW cache) ── */
+function lazyRetry<T extends { [key: string]: any }>(
+  factory: () => Promise<T>,
+  name: keyof T,
+) {
+  return lazy(() =>
+    factory()
+      .then((m) => ({ default: m[name] as React.ComponentType }))
+      .catch(() => {
+        // Chunk not found (stale cache) — reload once
+        const key = "chunk-retry";
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, "1");
+          window.location.reload();
+        }
+        return { default: () => null };
+      }),
+  );
+}
+
 /* ── Lazy-loaded pages ─────────────────────────────────── */
-const DashboardPage = lazy(() => import("@/paginas/DashboardPage").then(m => ({ default: m.DashboardPage })));
-const CatalogoPage = lazy(() => import("@/paginas/CatalogoPage").then(m => ({ default: m.CatalogoPage })));
-const CestasPage = lazy(() => import("@/paginas/CestasPage").then(m => ({ default: m.CestasPage })));
-const WizardNovaCesta = lazy(() => import("@/paginas/cestas/WizardNovaCesta").then(m => ({ default: m.WizardNovaCesta })));
-const DetalheCestaPage = lazy(() => import("@/paginas/cestas/DetalheCestaPage").then(m => ({ default: m.DetalheCestaPage })));
-const FornecedoresPage = lazy(() => import("@/paginas/FornecedoresPage").then(m => ({ default: m.FornecedoresPage })));
-const CotacoesPage = lazy(() => import("@/paginas/cotacoes/CotacoesPage").then(m => ({ default: m.CotacoesPage })));
-const DetalheCotacaoPage = lazy(() => import("@/paginas/cotacoes/DetalheCotacaoPage").then(m => ({ default: m.DetalheCotacaoPage })));
-const PortalFornecedorPage = lazy(() => import("@/paginas/cotacoes/PortalFornecedorPage").then(m => ({ default: m.PortalFornecedorPage })));
-const RelatoriosPage = lazy(() => import("@/paginas/RelatoriosPage").then(m => ({ default: m.RelatoriosPage })));
-const ConfiguracoesPage = lazy(() => import("@/paginas/ConfiguracoesPage").then(m => ({ default: m.ConfiguracoesPage })));
-const PesquisaRapidaPage = lazy(() => import("@/paginas/PesquisaRapidaPage").then(m => ({ default: m.PesquisaRapidaPage })));
-const PainelGestorPage = lazy(() => import("@/paginas/PainelGestorPage").then(m => ({ default: m.PainelGestorPage })));
-const LoginPage = lazy(() => import("@/paginas/LoginPage").then(m => ({ default: m.LoginPage })));
-const RecuperarSenhaPage = lazy(() => import("@/paginas/RecuperarSenhaPage").then(m => ({ default: m.RecuperarSenhaPage })));
-const RedefinirSenhaPage = lazy(() => import("@/paginas/RedefinirSenhaPage").then(m => ({ default: m.RedefinirSenhaPage })));
-const AjudaPage = lazy(() => import("@/paginas/AjudaPage").then(m => ({ default: m.AjudaPage })));
+const DashboardPage = lazyRetry(() => import("@/paginas/DashboardPage"), "DashboardPage");
+const CatalogoPage = lazyRetry(() => import("@/paginas/CatalogoPage"), "CatalogoPage");
+const CestasPage = lazyRetry(() => import("@/paginas/CestasPage"), "CestasPage");
+const WizardNovaCesta = lazyRetry(() => import("@/paginas/cestas/WizardNovaCesta"), "WizardNovaCesta");
+const DetalheCestaPage = lazyRetry(() => import("@/paginas/cestas/DetalheCestaPage"), "DetalheCestaPage");
+const FornecedoresPage = lazyRetry(() => import("@/paginas/FornecedoresPage"), "FornecedoresPage");
+const CotacoesPage = lazyRetry(() => import("@/paginas/cotacoes/CotacoesPage"), "CotacoesPage");
+const DetalheCotacaoPage = lazyRetry(() => import("@/paginas/cotacoes/DetalheCotacaoPage"), "DetalheCotacaoPage");
+const PortalFornecedorPage = lazyRetry(() => import("@/paginas/cotacoes/PortalFornecedorPage"), "PortalFornecedorPage");
+const RelatoriosPage = lazyRetry(() => import("@/paginas/RelatoriosPage"), "RelatoriosPage");
+const ConfiguracoesPage = lazyRetry(() => import("@/paginas/ConfiguracoesPage"), "ConfiguracoesPage");
+const PesquisaRapidaPage = lazyRetry(() => import("@/paginas/PesquisaRapidaPage"), "PesquisaRapidaPage");
+const PainelGestorPage = lazyRetry(() => import("@/paginas/PainelGestorPage"), "PainelGestorPage");
+const LoginPage = lazyRetry(() => import("@/paginas/LoginPage"), "LoginPage");
+const RecuperarSenhaPage = lazyRetry(() => import("@/paginas/RecuperarSenhaPage"), "RecuperarSenhaPage");
+const RedefinirSenhaPage = lazyRetry(() => import("@/paginas/RedefinirSenhaPage"), "RedefinirSenhaPage");
+const AjudaPage = lazyRetry(() => import("@/paginas/AjudaPage"), "AjudaPage");
 
 /* ── Phase 13 — Funcionalidades Avançadas ────────────── */
-const ComparadorCestasPage = lazy(() => import("@/paginas/ComparadorCestasPage").then(m => ({ default: m.ComparadorCestasPage })));
-const TemplatesCestasPage = lazy(() => import("@/paginas/TemplatesCestasPage").then(m => ({ default: m.TemplatesCestasPage })));
-const HistoricoPrecoPage = lazy(() => import("@/paginas/HistoricoPrecoPage").then(m => ({ default: m.HistoricoPrecoPage })));
-const MapaCalorRegionalPage = lazy(() => import("@/paginas/MapaCalorRegionalPage").then(m => ({ default: m.MapaCalorRegionalPage })));
-const AlertasPrecoPage = lazy(() => import("@/paginas/AlertasPrecoPage").then(m => ({ default: m.AlertasPrecoPage })));
-const ExportacaoSicomPage = lazy(() => import("@/paginas/ExportacaoSicomPage").then(m => ({ default: m.ExportacaoSicomPage })));
-const SugestaoFontesIAPage = lazy(() => import("@/paginas/SugestaoFontesIAPage").then(m => ({ default: m.SugestaoFontesIAPage })));
-const OcrCotacoesPage = lazy(() => import("@/paginas/OcrCotacoesPage").then(m => ({ default: m.OcrCotacoesPage })));
+const ComparadorCestasPage = lazyRetry(() => import("@/paginas/ComparadorCestasPage"), "ComparadorCestasPage");
+const TemplatesCestasPage = lazyRetry(() => import("@/paginas/TemplatesCestasPage"), "TemplatesCestasPage");
+const HistoricoPrecoPage = lazyRetry(() => import("@/paginas/HistoricoPrecoPage"), "HistoricoPrecoPage");
+const MapaCalorRegionalPage = lazyRetry(() => import("@/paginas/MapaCalorRegionalPage"), "MapaCalorRegionalPage");
+const AlertasPrecoPage = lazyRetry(() => import("@/paginas/AlertasPrecoPage"), "AlertasPrecoPage");
+const ExportacaoSicomPage = lazyRetry(() => import("@/paginas/ExportacaoSicomPage"), "ExportacaoSicomPage");
+const SugestaoFontesIAPage = lazyRetry(() => import("@/paginas/SugestaoFontesIAPage"), "SugestaoFontesIAPage");
+const OcrCotacoesPage = lazyRetry(() => import("@/paginas/OcrCotacoesPage"), "OcrCotacoesPage");
 
 /* ── Phase 14 — Multi-Tenancy & Escalabilidade ───────── */
-const OnboardingPage = lazy(() => import("@/paginas/OnboardingPage").then(m => ({ default: m.OnboardingPage })));
-const BillingPage = lazy(() => import("@/paginas/BillingPage").then(m => ({ default: m.BillingPage })));
-const AdminMetaclassPage = lazy(() => import("@/paginas/AdminMetaclassPage").then(m => ({ default: m.AdminMetaclassPage })));
-const MetricasUsoPage = lazy(() => import("@/paginas/MetricasUsoPage").then(m => ({ default: m.MetricasUsoPage })));
+const OnboardingPage = lazyRetry(() => import("@/paginas/OnboardingPage"), "OnboardingPage");
+const BillingPage = lazyRetry(() => import("@/paginas/BillingPage"), "BillingPage");
+const AdminMetaclassPage = lazyRetry(() => import("@/paginas/AdminMetaclassPage"), "AdminMetaclassPage");
+const MetricasUsoPage = lazyRetry(() => import("@/paginas/MetricasUsoPage"), "MetricasUsoPage");
 
 /* ── Phase 15 — Mobile / PWA ─────────────────────── */
-const NotificacoesPage = lazy(() => import("@/paginas/NotificacoesPage").then(m => ({ default: m.NotificacoesPage })));
+const NotificacoesPage = lazyRetry(() => import("@/paginas/NotificacoesPage"), "NotificacoesPage");
 
 /* ── Phase 16 — Consolidação & Qualidade ─────────── */
-const ApiPublicaPage = lazy(() => import("@/paginas/ApiPublicaPage").then(m => ({ default: m.ApiPublicaPage })));
+const ApiPublicaPage = lazyRetry(() => import("@/paginas/ApiPublicaPage"), "ApiPublicaPage");
 
 function App() {
   return (
