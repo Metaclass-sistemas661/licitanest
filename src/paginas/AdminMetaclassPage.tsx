@@ -56,8 +56,9 @@ export function AdminMetaclassPage() {
 
   const filtrados = tenants.filter(
     (t) =>
-      t.municipio?.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-      t.municipio?.uf?.toLowerCase().includes(busca.toLowerCase())
+      t.municipio &&
+      (t.municipio.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+       t.municipio.uf?.toLowerCase().includes(busca.toLowerCase()))
   );
 
   if (carregando) {
@@ -166,9 +167,9 @@ export function AdminMetaclassPage() {
               {filtrados.map((t) => {
                 const plano = t.assinatura?.plano as Record<string, unknown> | undefined;
                 return (
-                  <tr key={t.municipio.id} className="hover:bg-gray-50">
-                    <td className="py-3 font-medium text-gray-900">{t.municipio.nome}</td>
-                    <td className="py-3 text-gray-600">{t.municipio.uf}</td>
+                  <tr key={t.municipio?.id ?? crypto.randomUUID()} className="hover:bg-gray-50">
+                    <td className="py-3 font-medium text-gray-900">{t.municipio?.nome ?? "—"}</td>
+                    <td className="py-3 text-gray-600">{t.municipio?.uf ?? "—"}</td>
                     <td className="py-3 capitalize">
                       {(plano?.titulo as string) ?? "—"}
                     </td>
@@ -196,10 +197,10 @@ export function AdminMetaclassPage() {
                     </td>
                     <td className="py-3">
                       <button
-                        onClick={() => toggleAtivo(t.municipio.id, t.municipio.ativo)}
-                        title={t.municipio.ativo ? "Desativar" : "Ativar"}
+                        onClick={() => toggleAtivo(t.municipio!.id, t.municipio!.ativo)}
+                        title={t.municipio?.ativo ? "Desativar" : "Ativar"}
                       >
-                        {t.municipio.ativo ? (
+                        {t.municipio?.ativo ? (
                           <ToggleRight className="h-5 w-5 text-green-500" />
                         ) : (
                           <ToggleLeft className="h-5 w-5 text-gray-400" />
