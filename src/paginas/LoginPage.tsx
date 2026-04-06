@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/componentes/ui/button";
 import { Input } from "@/componentes/ui/input";
-import { Scale, Loader2, AlertCircle, Eye, EyeOff, Shield } from "lucide-react";
+import { Scale, Loader2, AlertCircle, Eye, EyeOff, Shield, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { loginSchema, validarComZod } from "@/lib/validacao";
 import { verificar2FAAtivo, obterSegredo2FA, verificarTOTP } from "@/servicos/totp";
@@ -113,7 +113,17 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#1e3a8a] p-4 sm:p-6">
       <div className="flex w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl" style={{ minHeight: 'calc(100vh - 3rem)' }}>
         {/* ── Lado Esquerdo: Formulário ─────────────────── */}
-        <div className="flex w-full flex-col justify-center px-8 py-10 sm:px-12 md:w-1/2">
+        <div className="relative flex w-full flex-col justify-center px-8 py-10 sm:px-12 md:w-1/2">
+          {/* Botão Voltar */}
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Voltar"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+
           <div className="mx-auto w-full max-w-sm">
             {/* Logo */}
             <div className="mb-6 flex flex-col items-center">
