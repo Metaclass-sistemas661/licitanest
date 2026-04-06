@@ -56,8 +56,8 @@ export function AdminMetaclassPage() {
 
   const filtrados = tenants.filter(
     (t) =>
-      t.municipio.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      t.municipio.uf.toLowerCase().includes(busca.toLowerCase())
+      t.municipio?.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+      t.municipio?.uf?.toLowerCase().includes(busca.toLowerCase())
   );
 
   if (carregando) {
