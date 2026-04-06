@@ -16,6 +16,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         globIgnores: ["**/home.html", "**/contato.html", "**/politica-de-privacidade.html", "**/termos-de-uso.html", "**/preferencias-de-cookies.html", "**/canal-lgpd.html"],
         cleanupOutdatedCaches: true,
+        skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
           {

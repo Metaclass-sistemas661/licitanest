@@ -9,6 +9,16 @@ import { ErrorBoundary } from "@/componentes/ui/error-boundary";
 import { PwaInstallBanner, PwaUpdateBanner, OfflineIndicator } from "@/componentes/pwa";
 
 /* ── Enterprise lazy loader with per-chunk retry + cache bust ── */
+async function purgeSwCaches(): Promise<void> {
+  if (!("caches" in window)) return;
+  const names = await window.caches.keys();
+  await Promise.all(
+    names
+      .filter((n) => n.includes("precache") || n.includes("workbox"))
+      .map((n) => window.caches.delete(n)),
+  );
+}
+
 function lazyRetry<T extends Record<string, any>>(
   factory: () => Promise<T>,
   name: keyof T,
@@ -16,40 +26,21 @@ function lazyRetry<T extends Record<string, any>>(
   return lazy(() =>
     factory()
       .then((m) => {
-        // Success — clear any previous retry flag for this chunk
         const key = `chunk-retry-${String(name)}`;
         sessionStorage.removeItem(key);
         return { default: m[name] as React.ComponentType };
       })
-      .catch((err: Error) => {
+      .catch(async (err: Error) => {
         const key = `chunk-retry-${String(name)}`;
         const retries = Number(sessionStorage.getItem(key) || "0");
 
         if (retries < 2) {
-          // Retry: cache-bust by appending timestamp to force fresh fetch
           sessionStorage.setItem(key, String(retries + 1));
-          // Purge the failed module from browser cache
-          if ("caches" in window) {
-            window.caches.keys().then((names) =>
-              names.forEach((n) => {
-                if (n.includes("workbox-precache") || n.includes("precache")) {
-                  window.caches.open(n).then((cache) =>
-                    cache.keys().then((reqs) =>
-                      reqs.forEach((req) => {
-                        if (req.url.includes(String(name))) cache.delete(req);
-                      }),
-                    ),
-                  );
-                }
-              }),
-            );
-          }
+          await purgeSwCaches();
           window.location.reload();
-          // Return empty component while reload happens
           return { default: (() => null) as unknown as React.ComponentType };
         }
 
-        // Max retries exhausted — let ErrorBoundary handle it
         sessionStorage.removeItem(key);
         throw err;
       }),
