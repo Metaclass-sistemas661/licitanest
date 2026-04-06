@@ -8,15 +8,23 @@ import prettierConfig from "eslint-config-prettier";
 export default [
   // Ignorar diretórios de build
   {
-    ignores: ["dist/**", "node_modules/**", "supabase/**", "api/**"],
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      "supabase/**",
+      "api/node_modules/**",
+      "api/dist/**",
+    ],
   },
 
   // Configuração base JS
   js.configs.recommended,
 
-  // Configuração TypeScript + React
+  // ───────────────────────────────────────────────────────
+  //  Frontend (React/Browser) — src/**/*.{ts,tsx}
+  // ───────────────────────────────────────────────────────
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -28,15 +36,47 @@ export default [
         // Browser globals
         document: "readonly",
         window: "readonly",
+        navigator: "readonly",
+        location: "readonly",
+        history: "readonly",
+        localStorage: "readonly",
+        sessionStorage: "readonly",
         console: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
         setInterval: "readonly",
         clearInterval: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
         fetch: "readonly",
         URL: "readonly",
+        URLSearchParams: "readonly",
         FormData: "readonly",
-        // DOM element types (usados em React.ComponentPropsWithRef, etc.)
+        Blob: "readonly",
+        File: "readonly",
+        FileReader: "readonly",
+        AbortController: "readonly",
+        AbortSignal: "readonly",
+        Response: "readonly",
+        Request: "readonly",
+        RequestInit: "readonly",
+        Headers: "readonly",
+        EventSource: "readonly",
+        WebSocket: "readonly",
+        crypto: "readonly",
+        atob: "readonly",
+        btoa: "readonly",
+        structuredClone: "readonly",
+        TextEncoder: "readonly",
+        TextDecoder: "readonly",
+        DOMException: "readonly",
+        alert: "readonly",
+        confirm: "readonly",
+        prompt: "readonly",
+        MediaQueryList: "readonly",
+        MediaQueryListEvent: "readonly",
+        matchMedia: "readonly",
+        // DOM element types
         HTMLElement: "readonly",
         HTMLInputElement: "readonly",
         HTMLButtonElement: "readonly",
@@ -53,6 +93,22 @@ export default [
         HTMLTableRowElement: "readonly",
         HTMLTableCellElement: "readonly",
         HTMLLabelElement: "readonly",
+        Element: "readonly",
+        Event: "readonly",
+        MouseEvent: "readonly",
+        KeyboardEvent: "readonly",
+        CustomEvent: "readonly",
+        MutationObserver: "readonly",
+        IntersectionObserver: "readonly",
+        ResizeObserver: "readonly",
+        DOMParser: "readonly",
+        Notification: "readonly",
+        NotificationOptions: "readonly",
+        PushSubscription: "readonly",
+        PushManager: "readonly",
+        ServiceWorkerRegistration: "readonly",
+        BufferSource: "readonly",
+        Uint8Array: "readonly",
         React: "readonly",
       },
     },
@@ -62,7 +118,6 @@ export default [
       "react-refresh": reactRefresh,
     },
     rules: {
-      // TypeScript
       ...tsPlugin.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -73,18 +128,72 @@ export default [
         "warn",
         { prefer: "type-imports" },
       ],
-
-      // React Hooks
       ...reactHooks.configs.recommended.rules,
-
-      // React Refresh
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
       ],
-
-      // Boas práticas gerais
       "no-console": ["warn", { allow: ["warn", "error"] }],
+      "prefer-const": "error",
+      "no-var": "error",
+      eqeqeq: ["error", "always"],
+    },
+  },
+
+  // ───────────────────────────────────────────────────────
+  //  API (Node.js/Fastify) — api/src/**/*.ts
+  // ───────────────────────────────────────────────────────
+  {
+    files: ["api/src/**/*.ts"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+      globals: {
+        // Node.js globals
+        process: "readonly",
+        console: "readonly",
+        Buffer: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        global: "readonly",
+        globalThis: "readonly",
+        crypto: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        setImmediate: "readonly",
+        clearImmediate: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        TextEncoder: "readonly",
+        TextDecoder: "readonly",
+        AbortController: "readonly",
+        AbortSignal: "readonly",
+        fetch: "readonly",
+        structuredClone: "readonly",
+        Uint8Array: "readonly",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        { prefer: "type-imports" },
+      ],
+      // API pode usar console.log para logging
+      "no-console": "off",
       "prefer-const": "error",
       "no-var": "error",
       eqeqeq: ["error", "always"],
@@ -94,9 +203,33 @@ export default [
   // Desativar regras que conflitam com Prettier
   prettierConfig,
 
-  // Configuração para arquivos Node.js (vite.config.ts, etc.)
+  // Configuração para arquivos de teste
   {
-    files: ["vite.config.ts", "eslint.config.js"],
+    files: ["src/test/**/*.{ts,tsx}", "**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    languageOptions: {
+      globals: {
+        __dirname: "readonly",
+        __filename: "readonly",
+        process: "readonly",
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        vi: "readonly",
+      },
+    },
+    rules: {
+      "no-console": "off",
+    },
+  },
+
+  // Configuração para arquivos de config (vite, eslint, vitest, etc.)
+  {
+    files: ["*.config.{js,ts}", "*.config.*.{js,ts}"],
     languageOptions: {
       globals: {
         __dirname: "readonly",
