@@ -2,10 +2,11 @@
  * Post-build: copia landing page para dist/
  * - dist/index.html (SPA React) → dist/app.html
  * - landing/* → dist/ (landing vira a raiz)
+ * - Reescreve ../public/ → / nos HTML (assets já estão na raiz do dist via Vite)
  * - landing/login.html redireciona para /login (SPA)
  */
-import { cpSync, renameSync, writeFileSync, existsSync } from "fs";
-import { resolve, dirname } from "path";
+import { cpSync, renameSync, writeFileSync, existsSync, readdirSync, readFileSync } from "fs";
+import { resolve, dirname, extname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,6 +21,26 @@ console.log("✓ dist/index.html → dist/app.html");
 // 2. Copiar landing/ → dist/ (CSS, JS, HTML)
 cpSync(landing, dist, { recursive: true, force: true });
 console.log("✓ landing/* → dist/");
+
+// 3. Reescrever paths ../public/ → / em todos os HTML copiados
+function fixAssetPaths(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = resolve(dir, entry.name);
+    if (entry.isDirectory()) {
+      fixAssetPaths(fullPath);
+    } else if (extname(entry.name) === ".html") {
+      let content = readFileSync(fullPath, "utf-8");
+      const original = content;
+      content = content.replace(/\.\.\/public\//g, "/");
+      if (content !== original) {
+        writeFileSync(fullPath, content);
+        console.log(`✓ Paths reescritos: ${entry.name}`);
+      }
+    }
+  }
+}
+fixAssetPaths(dist);
+console.log("✓ ../public/ → / em todos os HTML da landing");
 
 // 3. Substituir login.html por redirect para /login (SPA)
 writeFileSync(
