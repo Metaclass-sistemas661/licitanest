@@ -113,7 +113,8 @@ export function PesquisaRapidaPage() {
   // Atualizar dataInicio quando mudar periodo
   useEffect(() => {
     if (periodo !== "custom") {
-      setDataInicio(calcularDataInicioPeriodo(periodo));
+      const novaData = calcularDataInicioPeriodo(periodo);
+      queueMicrotask(() => setDataInicio(novaData));
     }
   }, [periodo]);
 

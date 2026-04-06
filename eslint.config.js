@@ -67,6 +67,7 @@ export default [
         atob: "readonly",
         btoa: "readonly",
         structuredClone: "readonly",
+        queueMicrotask: "readonly",
         TextEncoder: "readonly",
         TextDecoder: "readonly",
         DOMException: "readonly",
@@ -136,7 +137,7 @@ export default [
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "prefer-const": "error",
       "no-var": "error",
-      eqeqeq: ["error", "always"],
+      eqeqeq: ["error", "always", { null: "ignore" }],
     },
   },
 
@@ -196,7 +197,7 @@ export default [
       "no-console": "off",
       "prefer-const": "error",
       "no-var": "error",
-      eqeqeq: ["error", "always"],
+      eqeqeq: ["error", "always", { null: "ignore" }],
     },
   },
 

@@ -73,12 +73,12 @@ export function PortalFornecedorPage() {
         registro_anvisa: existente?.registro_anvisa ?? "",
       });
     }
-    setRespostas(map);
+    queueMicrotask(() => setRespostas(map));
 
     // Dados fornecedor das respostas existentes
     if (dados.respostas_existentes.length > 0) {
       const r = dados.respostas_existentes[0];
-      setDadosForn(prev => ({
+      queueMicrotask(() => setDadosForn(prev => ({
         ...prev,
         endereco_completo: r.endereco_completo ?? "",
         cep: r.cep ?? "",
@@ -87,7 +87,7 @@ export function PortalFornecedorPage() {
         prazo_validade_dias: r.prazo_validade_dias?.toString() ?? "60",
         nome_responsavel: r.nome_responsavel ?? "",
         cpf_responsavel: r.cpf_responsavel ?? "",
-      }));
+      })));
     }
   }, [dados]);
 

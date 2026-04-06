@@ -287,15 +287,18 @@ export function PainelGestorPage() {
   );
 }
 
+function formatarTempoRelativo(dataISO: string): string {
+  const diff = Date.now() - new Date(dataISO).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `${min}min`;
+  if (min < 1440) return `${Math.floor(min / 60)}h`;
+  return `${Math.floor(min / 1440)}d`;
+}
+
 function AtividadeItemGestor({ atividade }: { atividade: Atividade }) {
   const Icon = ATIVIDADE_ICONE[atividade.tipo] ?? FileBarChart2;
-  const diff = Date.now() - new Date(atividade.criado_em).getTime();
-  const min = Math.floor(diff / 60000);
-  let tempo: string;
-  if (min < 1) tempo = "agora";
-  else if (min < 60) tempo = `${min}min`;
-  else if (min < 1440) tempo = `${Math.floor(min / 60)}h`;
-  else tempo = `${Math.floor(min / 1440)}d`;
+  const tempo = formatarTempoRelativo(atividade.criado_em);
 
   return (
     <div className="flex items-start gap-2">

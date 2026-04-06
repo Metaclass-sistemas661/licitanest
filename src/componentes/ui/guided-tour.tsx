@@ -72,10 +72,12 @@ export function TourProvider({ children }: { children: ReactNode }) {
   }, [active, currentStep]);
 
   useEffect(() => {
-    updatePosition();
+    // Use requestAnimationFrame to avoid synchronous setState in effect
+    const raf = requestAnimationFrame(() => updatePosition());
     window.addEventListener("resize", updatePosition);
     window.addEventListener("scroll", updatePosition, true);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };

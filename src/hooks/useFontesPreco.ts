@@ -212,7 +212,7 @@ export function useBuscaTodasFontes() {
       }
       await Promise.allSettled(buscas);
     },
-    [pncp.buscar, painel.buscar, tce.buscar, multiTCE.buscar, bps.buscar, sinapi.buscar, conab.buscar, ceasa.buscar, cmed.buscar]
+    [pncp, painel, tce, multiTCE, bps, sinapi, conab, ceasa, cmed]
   );
 
   const limparTodas = useCallback(() => {
@@ -225,7 +225,7 @@ export function useBuscaTodasFontes() {
     conab.limpar();
     ceasa.limpar();
     cmed.limpar();
-  }, [pncp.limpar, painel.limpar, tce.limpar, multiTCE.limpar, bps.limpar, sinapi.limpar, conab.limpar, ceasa.limpar, cmed.limpar]);
+  }, [pncp, painel, tce, multiTCE, bps, sinapi, conab, ceasa, cmed]);
 
   const carregando =
     pncp.carregando || painel.carregando || tce.carregando || multiTCE.carregando ||

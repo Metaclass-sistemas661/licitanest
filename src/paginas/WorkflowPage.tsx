@@ -74,8 +74,9 @@ export function WorkflowPage() {
         );
         setCestaSelecionada(null);
         setConfirmacao(null);
-      } catch (e) {
-        throw e;
+      } catch {
+        // Re-throw para o componente de confirmação exibir erro
+        throw new Error("Falha ao tramitar cesta");
       }
     },
     [servidor, tramitar],

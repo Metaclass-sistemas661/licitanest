@@ -99,7 +99,7 @@ export function SegurancaDoisFatoresTab() {
     setSucesso("Autenticação de dois fatores ativada com sucesso!");
     setEtapa("status");
     setCodigo("");
-  }, [codigo, segredo]);
+  }, [codigo, segredo, servidor]);
 
   // Desativar 2FA
   const confirmarDesativacao = useCallback(async () => {
@@ -133,7 +133,7 @@ export function SegurancaDoisFatoresTab() {
     setSucesso("Autenticação de dois fatores desativada.");
     setEtapa("status");
     setCodigo("");
-  }, [codigo, usuario]);
+  }, [codigo, usuario, servidor]);
 
   const copiarSegredo = () => {
     navigator.clipboard.writeText(segredo);

@@ -85,6 +85,7 @@ export function DetalheCotacaoPage() {
   const { cotacaoId } = useParams<{ cotacaoId: string }>();
   const navigate = useNavigate();
   const { servidor } = useAuth();
+  const confirmar = useConfirm();
   const {
     cotacao,
     respostas,
@@ -260,8 +261,6 @@ export function DetalheCotacaoPage() {
       toast.error("Erro ao adicionar fornecedor");
     }
   };
-
-  const confirmar = useConfirm();
 
   const handleRemoverFornecedor = async (fornId: string) => {
     const ok = await confirmar({

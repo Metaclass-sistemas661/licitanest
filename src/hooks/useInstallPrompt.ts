@@ -22,7 +22,9 @@ export function useInstallPrompt() {
   useEffect(() => {
     // Detectar se já está em modo standalone (instalado)
     const mq = window.matchMedia("(display-mode: standalone)");
-    setJaInstalado(mq.matches);
+    const isStandalone = mq.matches;
+    // Use queueMicrotask to avoid synchronous setState in effect
+    queueMicrotask(() => setJaInstalado(isStandalone));
 
     const handleChange = (e: MediaQueryListEvent) => setJaInstalado(e.matches);
     mq.addEventListener("change", handleChange);

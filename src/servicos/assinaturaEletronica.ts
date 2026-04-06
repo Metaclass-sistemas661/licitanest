@@ -135,7 +135,6 @@ export async function gerarPDFCotacaoFornecedor(
 
   const doc = new jsPDF("p", "mm", "a4");
   const W = doc.internal.pageSize.getWidth();
-  let y = 15;
 
   // ── Cabeçalho ──
   doc.setFillColor(37, 99, 235); // blue-600
@@ -149,7 +148,7 @@ export async function gerarPDFCotacaoFornecedor(
   doc.text("LicitaNest — Sistema de Cestas de Preços", W / 2, 22, { align: "center" });
   doc.text(`Gerado em: ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`, W / 2, 28, { align: "center" });
 
-  y = 45;
+  let y = 45;
   doc.setTextColor(30, 41, 59); // slate-800
 
   // ── Dados da Cotação ──

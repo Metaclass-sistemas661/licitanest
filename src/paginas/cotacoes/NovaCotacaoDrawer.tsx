@@ -75,20 +75,22 @@ export function NovaCotacaoDrawer({ aberto, onClose, onCriada }: Props) {
   // Carregar cestas
   useEffect(() => {
     if (!aberto) return;
-    setCarregandoCestas(true);
+    queueMicrotask(() => setCarregandoCestas(true));
     listarCestas({ busca: buscaCesta || undefined }, 1, 50)
-      .then(r => setCestas(r.data))
+      .then(r => { queueMicrotask(() => setCestas(r.data)); })
       .finally(() => setCarregandoCestas(false));
   }, [aberto, buscaCesta]);
 
   // Ao selecionar cesta, carregar itens
   useEffect(() => {
     if (!cestaSelecionada) return;
-    setCarregandoItens(true);
+    queueMicrotask(() => setCarregandoItens(true));
     listarItensCesta(cestaSelecionada.id)
       .then(itens => {
-        setItensCesta(itens);
-        setItensSelecionados(new Set(itens.map(i => i.id)));
+        queueMicrotask(() => {
+          setItensCesta(itens);
+          setItensSelecionados(new Set(itens.map(i => i.id)));
+        });
       })
       .finally(() => setCarregandoItens(false));
   }, [cestaSelecionada]);
@@ -98,7 +100,8 @@ export function NovaCotacaoDrawer({ aberto, onClose, onCriada }: Props) {
     if (!dataEncerramento) {
       const d = new Date();
       d.setDate(d.getDate() + 15);
-      setDataEncerramento(d.toISOString().split("T")[0]);
+      const novaData = d.toISOString().split("T")[0];
+      queueMicrotask(() => setDataEncerramento(novaData));
     }
   }, [dataEncerramento]);
 
