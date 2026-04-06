@@ -5,24 +5,53 @@ import { PrivateRoute } from "@/componentes/auth/PrivateRoute";
 import { AppLayout } from "@/componentes/layout/AppLayout";
 import { Toaster } from "sonner";
 import { PageLoader } from "@/componentes/ui/page-loader";
+import { ErrorBoundary } from "@/componentes/ui/error-boundary";
 import { PwaInstallBanner, PwaUpdateBanner, OfflineIndicator } from "@/componentes/pwa";
 
-/* ── Retry wrapper for lazy imports (handles stale SW cache) ── */
-function lazyRetry<T extends { [key: string]: any }>(
+/* ── Enterprise lazy loader with per-chunk retry + cache bust ── */
+function lazyRetry<T extends Record<string, any>>(
   factory: () => Promise<T>,
   name: keyof T,
 ) {
   return lazy(() =>
     factory()
-      .then((m) => ({ default: m[name] as React.ComponentType }))
-      .catch(() => {
-        // Chunk not found (stale cache) — reload once
-        const key = "chunk-retry";
-        if (!sessionStorage.getItem(key)) {
-          sessionStorage.setItem(key, "1");
+      .then((m) => {
+        // Success — clear any previous retry flag for this chunk
+        const key = `chunk-retry-${String(name)}`;
+        sessionStorage.removeItem(key);
+        return { default: m[name] as React.ComponentType };
+      })
+      .catch((err: Error) => {
+        const key = `chunk-retry-${String(name)}`;
+        const retries = Number(sessionStorage.getItem(key) || "0");
+
+        if (retries < 2) {
+          // Retry: cache-bust by appending timestamp to force fresh fetch
+          sessionStorage.setItem(key, String(retries + 1));
+          // Purge the failed module from browser cache
+          if ("caches" in window) {
+            caches.keys().then((names) =>
+              names.forEach((n) => {
+                if (n.includes("workbox-precache") || n.includes("precache")) {
+                  caches.open(n).then((cache) =>
+                    cache.keys().then((reqs) =>
+                      reqs.forEach((req) => {
+                        if (req.url.includes(String(name))) cache.delete(req);
+                      }),
+                    ),
+                  );
+                }
+              }),
+            );
+          }
           window.location.reload();
+          // Return empty component while reload happens
+          return { default: (() => null) as unknown as React.ComponentType };
         }
-        return { default: () => null };
+
+        // Max retries exhausted — let ErrorBoundary handle it
+        sessionStorage.removeItem(key);
+        throw err;
       }),
   );
 }
@@ -87,8 +116,9 @@ function App() {
         }}
       />
 
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           {/* ── Rotas públicas ──────────────────────────────── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
@@ -158,7 +188,8 @@ function App() {
             </Route>
           </Route>
         </Routes>
-      </Suspense>
+        </Suspense>
+      </ErrorBoundary>
     </AuthProvider>
   );
 }

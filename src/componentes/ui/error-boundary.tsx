@@ -23,6 +23,29 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("[ErrorBoundary]", error, info.componentStack);
+
+    // Detect chunk loading failures (stale SW cache after deploy)
+    const isChunkError =
+      error.message.includes("Failed to fetch dynamically imported module") ||
+      error.message.includes("Loading chunk") ||
+      error.message.includes("Loading CSS chunk");
+
+    if (isChunkError) {
+      // Purge precache and reload automatically
+      if ("caches" in window) {
+        caches.keys().then((names) =>
+          Promise.all(
+            names
+              .filter((n) => n.includes("precache") || n.includes("workbox"))
+              .map((n) => caches.delete(n)),
+          ),
+        ).then(() => location.reload());
+        return;
+      }
+      location.reload();
+      return;
+    }
+
     // Registrar no audit log via API (fire-and-forget)
     try {
       const payload = {
