@@ -10,112 +10,116 @@
     ],
     "rewrites": [
       {
+        "source": "/",
+        "destination": "/home.html"
+      },
+      {
         "source": "/login",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/recuperar-senha",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/redefinir-senha",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/onboarding",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/portal/**",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/catalogo",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/cestas/**",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/cotacoes/**",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/fornecedores",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/pesquisa-rapida",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/relatorios",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/configuracoes",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/painel-gestor",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/ajuda",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/comparador",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/templates-cestas",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/historico-precos",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/mapa-calor",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/alertas-preco",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/exportacao-sicom",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/sugestao-fontes-ia",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/ocr-cotacoes",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/billing",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/metricas-uso",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/notificacoes",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/api-publica",
-        "destination": "/app.html"
+        "destination": "/index.html"
       },
       {
         "source": "/admin-metaclass",
-        "destination": "/app.html"
+        "destination": "/index.html"
       }
     ],
     "headers": [

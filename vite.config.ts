@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: false,           // usamos /public/manifest.json manual
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        globIgnores: ["**/index.html"],
+        globIgnores: ["**/home.html", "**/contato.html", "**/politica-de-privacidade.html", "**/termos-de-uso.html", "**/preferencias-de-cookies.html", "**/canal-lgpd.html"],
         runtimeCaching: [
           {
             // Cache de API REST (network-first, fallback 24h)
@@ -48,7 +48,7 @@ export default defineConfig({
             },
           },
         ],
-        navigateFallback: "/app.html",
+        navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /^\/portal\/cotacao/, /^\/$/, /^\/contato/, /^\/politica/, /^\/termos/, /^\/preferencias/, /^\/canal-lgpd/],
       },
       devOptions: {

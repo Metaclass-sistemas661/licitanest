@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Licitanest — Cesta de Preços Inteligente para Licitações | PNCP, TCEs e IN 65</title>
+    <meta name="description" content="Plataforma de pesquisa de preços automatizada para licitações municipais. Monte cestas de preços com dados do PNCP, TCEs e Painel de Preços em segundos. Conforme Lei 14.133 e IN 65/2021.">
+    <meta name="keywords" content="cesta de preços, licitação, pesquisa de preços, PNCP, TCE, IN 65, Lei 14.133, compras públicas, pregão, pregoeiro, município">
+    <meta name="author" content="Metaclass Tecnologia">
+    <link rel="canonical" href="https://licitanest.com.br/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Licitanest — Cesta de Preços Inteligente para Licitações">
+    <meta property="og:description" content="Monte cestas de preços com dados do PNCP, TCEs e Painel de Preços em segundos. Conforme Lei 14.133 e IN 65.">
+    <meta property="og:url" content="https://licitanest.com.br/">
+    <meta property="og:site_name" content="Licitanest">
+    <meta property="og:locale" content="pt_BR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Licitanest — Cesta de Preços Inteligente para Licitações">
+    <meta name="twitter:description" content="Monte cestas de preços com dados do PNCP, TCEs e Painel de Preços em segundos.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon-192x192.svg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Schema.org: SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Licitanest",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Plataforma de pesquisa de preços automatizada para licitações municipais. Monte cestas de preços com dados do PNCP, TCEs e Painel de Preços.",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "BRL",
+            "description": "Consulte valores sob demanda"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Metaclass Tecnologia"
+        }
+    }
+    </script>
+
+    <!-- Schema.org: FAQPage -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Quão rápido consigo começar a usar a plataforma e montar uma Cesta?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "O onboarding é imediato. Como o Licitanest é puramente SaaS (em nuvem), não há necessidade de instalações locais nos servidores. Em 10 minutos, sua equipe já estará montando, comparando preços e estruturando uma Cesta de Preços completa."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "O sistema coleta os preços simultaneamente em várias fontes de pesquisa?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sim. Nossa inteligência simula a pesquisa nos Painéis de Preços vigentes (Painel Nacional, Banco de Preços em Saúde - BPS), validando o item base, e até mesmo integrando cotações com fornecedores de forma rastreável para preencher as Cestas automaticamente."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Meus dados processuais estão seguros e em conformidade com a lei?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Absolutamente. Seguimos as diretrizes da Lei 14.133/21 e da IN 65/2021, garantindo que toda coleta de preço contenha o rastro completo, assinatura de tempo e URL de origem, fundamental para amparo jurídico perante os Tribunais de Contas."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quais formatos de integração o Licitanest exporta para anexar ao SICOM?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Nossas Cestas já nascem prontas para integração. Contamos com rotinas de exportação para os TCs e licitações eletrônicas em XML, JSON e planilhas .XLSX nativas."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Os membros da CPL precisam de conhecimento técnico avançado?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Não. A interface foi construída seguindo paradigmas dos aplicativos mais fáceis do mercado. Se sua equipe consegue usar um e-mail moderno, conseguirá operar a montagem de Cestas no Licitanest."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Como funcionam os limites de usuários por assinatura?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "O Licitanest foca no sucesso do órgão público como um todo. Nossos planos são baseados no volume de Cestas Processuais ou Orçamentos Gerados – permitindo logins ilimitados."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+
+<body>
+
+    <!-- SCROLL PROGRESS BAR -->
+    <div class="scroll-progress-bar"></div>
+
+    <!-- STICKY FLOATING HEADER -->
+    <header class="main-header">
+        <a href="/" class="logo">
+            <div class="logo-text">
+                <span class="logo-name">licitanest</span>
+                <span class="logo-sub">by metaclass</span>
+            </div>
+        </a>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#hero" class="active">Início</a></li>
+                <li><a href="#solucoes">Soluções</a></li>
+                <li><a href="#processo">Como Funciona</a></li>
+                <li><a href="#funcionalidades">Funcionalidades</a></li>
+                <li><a href="#depoimentos">Depoimentos</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-actions">
+            <a href="contato.html" class="header-cta secondary">
+                <span>Solicitar Acesso</span>
+            </a>
+            <a href="/login" class="header-cta">
+                <span>Entrar</span>
+            </a>
+            <button class="hamburger-btn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div class="mobile-menu-overlay">
+        <a href="#hero">Início</a>
+        <a href="#solucoes">Soluções</a>
+        <a href="#processo">Como Funciona</a>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#depoimentos">Depoimentos</a>
+        <a href="#faq">FAQ</a>
+        <a href="/login">Entrar</a>
+        <a href="contato.html" class="mobile-menu-cta">Solicitar Acesso</a>
+    </div>
+
+    <!-- HERO WRAPPER -->
+    <div class="hero-wrapper">
+        <section class="hero" id="hero">
+            <video class="hero-bg-map" id="hero-map" autoplay loop muted playsinline>
+                <source src="/video-3d.mp4" type="video/mp4">
+            </video>
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+                <div class="badge hero-badge">
+                    <div class="badge-dot"></div>
+                    <span style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">Mapeamento Nacional</span>
+                </div>
+                <h1 class="hero-title" data-split-text>A <span>Cesta de Preços</span> definitiva.</h1>
+                <p class="hero-subtitle hero-sub-anim">
+                    Inteligência de dados consolidada de todo o país. Obtenha valores precisos do PNCP, TCEs e Painel de Preços em segundos, documentados e prontos para auditoria.
+                </p>
+                <div class="cta-group hero-cta-anim">
+                    <a href="contato.html" class="btn btn-primary magnetic-wrap">
+                        Montar Cesta Agora
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                    <a href="#processo" class="btn btn-secondary">
+                        Ver como funciona
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- INTEGRATIONS MARQUEE -->
+    <section id="integra_marcas" style="padding-bottom: 20px; background-color: #f3f4f6; position: relative; z-index: 11; border-top-left-radius: 40px; border-top-right-radius: 40px;">
+        <div class="integrations-banner">
+            <div class="integrations-track">
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg> INTEGRAÇÃO PNCP</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg> TCEs MUNICIPAIS</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10z"></path></svg> COMPRASNET (API)</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> BANCO DE PREÇOS</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg> ATAS DE REGISTRO DE PREÇOS</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg> PAINEL DE PREÇOS</div>
+                <!-- Duplicado para marquee infinito -->
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg> INTEGRAÇÃO PNCP</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg> TCEs MUNICIPAIS</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10z"></path></svg> COMPRASNET (API)</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> BANCO DE PREÇOS</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg> ATAS DE REGISTRO DE PREÇOS</div>
+                <div class="integration-item"><svg class="integration-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path></svg> PAINEL DE PREÇOS</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CLEAN FEATURES: Soluções -->
+    <section class="clean-features section-reveal" id="solucoes">
+        <div class="clean-features-container">
+            <div class="cf-visual">
+                <div class="cf-orb cf-orb-1"></div>
+                <div class="cf-orb cf-orb-2"></div>
+                <img src="/licitacao.png" alt="Tela Licitanest" class="cf-image-render" loading="lazy" />
+            </div>
+
+            <div class="clean-features-text">
+                <h2 class="clean-title">
+                    Automação cirúrgica<br>
+                    para a Gestão Pública.
+                </h2>
+                <p class="clean-paragraph">
+                    Mais do que varrer fontes, o Licitanest decodifica as regras do jogo. Preços inexequíveis e lances viciados são isolados em tempo real pela nossa IA. Chega de refazer cestas inteiras por causa de um outlier que destruiu a média da sua licitação.
+                </p>
+                <a href="contato.html" class="clean-link">
+                    Filtro Bayesiano Anti-Lixo em ação
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+                <p class="clean-paragraph" style="margin-bottom: 1rem; color: #9ca3af; font-size: 1rem;">
+                    Milhares de fontes simultâneas vasculhadas, em menos de três segundos. Modelos matemáticos refinam a pesquisa entregando uma amostra pura, livre de lances "suicidas" de leilões fracassados com documentação passo-a-passo.
+                </p>
+                <div class="clean-divider"></div>
+                <div class="clean-bottom-features">
+                    <div class="cbf-item">
+                        <div class="cbf-icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                        <div class="cbf-text">Acesso em tempo real aos TCEs e PNCP</div>
+                    </div>
+                    <div class="cbf-item">
+                        <div class="cbf-icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        </div>
+                        <div class="cbf-text">Blindagem Total: Logs de rastreio em PDF</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROCESSO: 3 Passos -->
+    <section class="process-section section-reveal" id="processo">
+        <div class="process-container">
+            <div class="process-header">
+                <div class="process-header-left">
+                    <h2>Sua pesquisa de preços,<br><span>em três passos.</span></h2>
+                </div>
+                <div class="process-header-right">
+                    <p>Crie cestas completas como quem faz um PIX. Nossa IA varre PNCP, TCEs e Painel de Preços em segundos enquanto você cuida do que importa: a estratégia da contratação.</p>
+                    <a href="contato.html" class="process-cta-link">
+                        Ver demonstração ao vivo
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+            <div class="process-steps">
+                <div class="process-step">
+                    <span class="process-step-number">01</span>
+                    <div class="process-step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <h3>Defina o objeto</h3>
+                    <p>Digite a descrição do item ou cole o CATMAT/CATSER. A IA sugere automaticamente especificações e unidades de medida compatíveis com o Art. 23 da Lei 14.133.</p>
+                    <span class="process-step-tag">Autocompletar IA</span>
+                </div>
+                <div class="process-step">
+                    <span class="process-step-number">02</span>
+                    <div class="process-step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    </div>
+                    <h3>Coleta automática</h3>
+                    <p>O motor varre simultaneamente PNCP, Painel de Preços, Atas de RP e TCEs municipais. Outliers são isolados pelo filtro Bayesiano antes de compor a amostra final.</p>
+                    <span class="process-step-tag">6 fontes simultâneas</span>
+                </div>
+                <div class="process-step">
+                    <span class="process-step-number">03</span>
+                    <div class="process-step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    </div>
+                    <h3>Relatório pronto</h3>
+                    <p>Em segundos, você exporta o PDF com memória de cálculo, gráficos comparativos e justificativa técnica formatada nos padrões exigidos pelo TCE e CGU.</p>
+                    <span class="process-step-tag">Pronto para auditoria</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FUNCIONALIDADES: Grid 3x2 -->
+    <section class="features-section section-reveal" id="funcionalidades">
+        <h2 class="features-section-title">Funcionalidades que blindam<br>sua pesquisa de preços</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-item-icon"><img src="/icons/imagem1.png" alt="Conformidade" loading="lazy" /></div>
+                <div class="feature-item-box">
+                    <div class="feature-item-box-header">
+                        <span class="feature-item-label">Conformidade</span>
+                        <span class="feature-item-arrow">→</span>
+                    </div>
+                    <h3 class="feature-item-title">Documentação pronta para auditoria.</h3>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-item-icon"><img src="/icons/imagem2.png" alt="Filtro" loading="lazy" /></div>
+                <div class="feature-item-box">
+                    <div class="feature-item-box-header">
+                        <span class="feature-item-label">Filtro Anti-Outlier</span>
+                        <span class="feature-item-arrow">→</span>
+                    </div>
+                    <h3 class="feature-item-title">Elimine preços inexequíveis.</h3>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-item-icon"><img src="/icons/imagem3.png" alt="Painel" loading="lazy" /></div>
+                <div class="feature-item-box">
+                    <div class="feature-item-box-header">
+                        <span class="feature-item-label">Painel Multi-Fonte</span>
+                        <span class="feature-item-arrow">→</span>
+                    </div>
+                    <h3 class="feature-item-title">Todas as fontes em um dashboard.</h3>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-item-icon"><img src="/icons/imagem4.png" alt="Relatório" loading="lazy" /></div>
+                <div class="feature-item-box">
+                    <div class="feature-item-box-header">
+                        <span class="feature-item-label">Relatório PDF</span>
+                        <span class="feature-item-arrow">→</span>
+                    </div>
+                    <h3 class="feature-item-title">Gere documentos em segundos.</h3>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-item-icon"><img src="/icons/imagem5.png" alt="Análise" loading="lazy" /></div>
+                <div class="feature-item-box">
+                    <div class="feature-item-box-header">
+                        <span class="feature-item-label">Análise em Tempo Real</span>
+                        <span class="feature-item-arrow">→</span>
+                    </div>
+                    <h3 class="feature-item-title">Monitore preços 24h por dia.</h3>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-item-icon"><img src="/icons/imagem6.png" alt="Equipe" loading="lazy" /></div>
+                <div class="feature-item-box">
+                    <div class="feature-item-box-header">
+                        <span class="feature-item-label">Colaboração</span>
+                        <span class="feature-item-arrow">→</span>
+                    </div>
+                    <h3 class="feature-item-title">Compartilhe cestas com a equipe.</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEPOIMENTOS + MAPA + CONFORMIDADE -->
+    <section class="testimonials-section section-reveal" id="depoimentos">
+
+        <div class="testimonials-header">
+            <h2 class="testimonials-title">
+                Quem usa, <span>recomenda!</span>
+                <div class="testimonials-badge">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+            </h2>
+        </div>
+
+        <div class="testimonials-track-container">
+            <div class="testimonials-track">
+
+                <!-- Card 1 -->
+                <div class="testi-card">
+                    <div class="testi-avatar avatar-1">FA</div>
+                    <div class="testi-user-info">
+                        <span class="testi-name">Fernanda A.</span>
+                        <span class="testi-role">Agente de Contratação</span>
+                    </div>
+                    <div class="testi-quote">
+                        <p>O sistema do <strong>Licitanest</strong> me ajudou a ver as compras públicas de outra forma: uma forma mais fácil e descomplicada.</p>
+                        <p>A automação e a segurança jurídica com a Nova Lei (14.133) foram a melhor escolha que fiz para o nosso setor!</p>
+                    </div>
+                    <div class="testi-footer">
+                        <div class="testi-logo">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Licitanest
+                        </div>
+                        <div class="testi-slogan">Uma licitação segura <br>começa com <span>precisão.</span></div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="testi-card">
+                    <div class="testi-avatar avatar-2">RG</div>
+                    <div class="testi-user-info">
+                        <span class="testi-name">Ricardo G.</span>
+                        <span class="testi-role">Sec. de Administração</span>
+                    </div>
+                    <div class="testi-quote">
+                        <p>A blindagem que a ferramenta entrega é impressionante. O <strong>filtro automático</strong> de lances inexequíveis nos poupou semanas de trabalho.</p>
+                        <p>Os relatórios são robustos e nos protegeram em duas auditorias recentes do Tribunal de Contas.</p>
+                    </div>
+                    <div class="testi-footer">
+                        <div class="testi-logo">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Licitanest
+                        </div>
+                        <div class="testi-slogan">Uma licitação segura <br>começa com <span>precisão.</span></div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="testi-card">
+                    <div class="testi-avatar avatar-3">MS</div>
+                    <div class="testi-user-info">
+                        <span class="testi-name">Marta S.</span>
+                        <span class="testi-role">Pregoeira Institucional</span>
+                    </div>
+                    <div class="testi-quote">
+                        <p>Mudou totalmente a rotina da nossa comissão. Conseguimos montar cestas de preços buscando no <strong>PNCP</strong> e <strong>TCEs</strong> simultaneamente.</p>
+                        <p>O que a equipe levava mais de dez dias para fazer, a IA nos entrega compilado em dois minutos com o relatório final.</p>
+                    </div>
+                    <div class="testi-footer">
+                        <div class="testi-logo">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Licitanest
+                        </div>
+                        <div class="testi-slogan">Uma licitação segura <br>começa com <span>precisão.</span></div>
+                    </div>
+                </div>
+
+                <!-- Duplicados para efeito infinito -->
+                <div class="testi-card">
+                    <div class="testi-avatar avatar-1">FA</div>
+                    <div class="testi-user-info">
+                        <span class="testi-name">Fernanda A.</span>
+                        <span class="testi-role">Agente de Contratação</span>
+                    </div>
+                    <div class="testi-quote">
+                        <p>O sistema do <strong>Licitanest</strong> me ajudou a ver as compras públicas de outra forma: uma forma mais fácil e descomplicada.</p>
+                        <p>A automação e a segurança jurídica com a Nova Lei (14.133) foram a melhor escolha que fiz para o nosso setor!</p>
+                    </div>
+                    <div class="testi-footer">
+                        <div class="testi-logo">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Licitanest
+                        </div>
+                        <div class="testi-slogan">Uma licitação segura <br>começa com <span>precisão.</span></div>
+                    </div>
+                </div>
+                <div class="testi-card">
+                    <div class="testi-avatar avatar-2">RG</div>
+                    <div class="testi-user-info">
+                        <span class="testi-name">Ricardo G.</span>
+                        <span class="testi-role">Sec. de Administração</span>
+                    </div>
+                    <div class="testi-quote">
+                        <p>A blindagem que a ferramenta entrega é impressionante. O <strong>filtro automático</strong> de lances inexequíveis nos poupou semanas de trabalho.</p>
+                        <p>Os relatórios são robustos e nos protegeram em duas auditorias recentes do Tribunal de Contas.</p>
+                    </div>
+                    <div class="testi-footer">
+                        <div class="testi-logo">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Licitanest
+                        </div>
+                        <div class="testi-slogan">Uma licitação segura <br>começa com <span>precisão.</span></div>
+                    </div>
+                </div>
+                <div class="testi-card">
+                    <div class="testi-avatar avatar-3">MS</div>
+                    <div class="testi-user-info">
+                        <span class="testi-name">Marta S.</span>
+                        <span class="testi-role">Pregoeira Institucional</span>
+                    </div>
+                    <div class="testi-quote">
+                        <p>Mudou totalmente a rotina da nossa comissão. Conseguimos montar cestas de preços buscando no <strong>PNCP</strong> e <strong>TCEs</strong> simultaneamente.</p>
+                        <p>O que a equipe levava mais de dez dias para fazer, a IA nos entrega compilado em dois minutos com o relatório final.</p>
+                    </div>
+                    <div class="testi-footer">
+                        <div class="testi-logo">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            Licitanest
+                        </div>
+                        <div class="testi-slogan">Uma licitação segura <br>começa com <span>precisão.</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MAPA NACIONAL -->
+        <div class="national-map-container">
+            <div class="map-content-left">
+                <span class="map-badge">Big Data de Compras Públicas</span>
+                <h2 class="map-title">Mapeamento de preços<br><span>em todo o Brasil</span></h2>
+                <p class="map-desc">Encontre os valores praticados em compras governamentais de qualquer região para compor sua pesquisa de mercado com segurança.</p>
+                <p class="map-desc">Nossa base de dados captura resultados homologados de todos os Tribunais de Contas e do PNCP, garantindo referenciais sólidos e atualizados.</p>
+                <p class="map-desc" style="font-size: 0.95rem; opacity: 0.7; margin-bottom: 0;">Construa cestas de preços inquestionáveis para suas licitações, em total conformidade com a IN 65 e a Nova Lei 14.133.</p>
+                <div class="map-stats-grid">
+                    <div class="map-stat-item"><h3>5.570+</h3><p>Municípios cobertos</p></div>
+                    <div class="map-stat-item"><h3>99,7%</h3><p>Acurácia de dados</p></div>
+                    <div class="map-stat-item"><h3>98%</h3><p>Tempo economizado</p></div>
+                </div>
+                <a href="contato.html" class="map-btn">
+                    Explorar fontes de preços
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                </a>
+            </div>
+            <div class="map-visual-right" style="position: relative;">
+                <div class="interactive-map-container" style="position: relative; width: 100%; max-width: 600px; display: flex; justify-content: center; align-items: center;">
+                    <img src="/mapa-secao.png" alt="Mapa do Brasil Licitanest" style="width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 0 50px rgba(0, 150, 255, 0.4));" loading="lazy" />
+                    <div class="map-pin" style="top: 65%; left: 63%;" title="São Paulo: 450+ Cestas geradas"></div>
+                    <div class="map-pin" style="top: 48%; left: 55%;" title="Brasília: 820+ Cestas geradas"></div>
+                    <div class="map-pin" style="top: 25%; left: 78%;" title="Ceará: 310+ Cestas geradas"></div>
+                    <div class="map-pin" style="top: 85%; left: 52%;" title="Rio Grande do Sul: 215+ Cestas geradas"></div>
+                    <div class="map-pin" style="top: 30%; left: 25%;" title="Amazonas: 120+ Cestas geradas"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFORMIDADE LEGAL -->
+        <div class="compliance-container">
+            <div class="compliance-header">
+                <span class="compliance-subtitle">A SEGURANÇA QUE VOCÊ PRECISA</span>
+                <h2 class="compliance-title">Conformidade Legal Garantida</h2>
+            </div>
+            <div class="compliance-grid">
+                <div class="compliance-card">
+                    <div class="compliance-img-box">
+                        <img src="/primeiro-card.svg" alt="Segurança - Lei 14.133" class="animated-svg-icon" />
+                    </div>
+                    <h3>Nova Lei 14.133/21</h3>
+                    <p>Amparado pelas regras gerais de licitação e contratos para as Administrações Públicas direta e autárquica.</p>
+                    <a href="contato.html" class="compliance-btn">Saber mais</a>
+                </div>
+                <div class="compliance-card">
+                    <div class="compliance-img-box">
+                        <img src="/segundo-card.svg" alt="Instrução Normativa 65" class="animated-svg-icon" />
+                    </div>
+                    <h3>Instrução Normativa 65</h3>
+                    <p>Metodologia alinhada à IN 65/2021, garantindo ampla pesquisa em bases oficiais de preços praticados.</p>
+                    <a href="contato.html" class="compliance-btn">Saber mais</a>
+                </div>
+                <div class="compliance-card">
+                    <div class="compliance-img-box">
+                        <img src="/terceiro-card.svg" alt="Rastreabilidade" class="animated-svg-icon" />
+                    </div>
+                    <h3>Rastreabilidade Total</h3>
+                    <p>Registro imutável com preservação da memória de cálculo e marca de tempo de cada cotação coletada.</p>
+                    <a href="contato.html" class="compliance-btn">Saber mais</a>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- TOOLKIT + CTA SPLIT -->
+    <section class="toolkit-section section-reveal">
+        <div class="toolkit-header">
+            <h2>Tudo que a comissão precisa em uma única plataforma</h2>
+        </div>
+        <div class="toolkit-grid">
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
+                    <h3>Importação em Lote</h3>
+                </div>
+                <p>Faça upload de suas planilhas de certames e deixe nossa engine ler e buscar todas as cotações simultaneamente.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg></div>
+                    <h3>Integração CATMAT/CATSER</h3>
+                </div>
+                <p>Busca nativa e cruzamento direto com os códigos oficiais do catálogo de materiais do Governo Federal.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path><path d="M14 2v6h6"></path><path d="M3 15h6"></path><path d="M3 18h6"></path></svg></div>
+                    <h3>Leitura OCR de Cotações</h3>
+                </div>
+                <p>Recebeu cotação direta em PDF ou imagem? Nossa IA extrai os dados do fornecedor e preenche a cesta para você.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+                    <h3>Correção Monetária IN 65</h3>
+                </div>
+                <p>Atualize automaticamente referências antigas usando índices financeiros (IPCA/IGP-M) em apenas um clique.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg></div>
+                    <h3>Mapa de Calor Regional</h3>
+                </div>
+                <p>Identifique rapidamente tendências de preços e outliers mapeados geograficamente em um painel interativo.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-6"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
+                    <h3>Exportação SICOM & TCEs</h3>
+                </div>
+                <p>Módulo exclusivo para gerar leiautes e remessas exatas exigidas pelos sistemas de controle externo governamental.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-7"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
+                    <h3>Assinatura Eletrônica</h3>
+                </div>
+                <p>Workflow com validade jurídica totalmente integrado para aprovação e tramitação de documentos pelo comitê.</p>
+            </div>
+            <div class="toolkit-card">
+                <div class="toolkit-card-header">
+                    <div class="toolkit-icon tk-8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><path d="M13 8h4"></path><path d="M13 12h4"></path></svg></div>
+                    <h3>Templates de Compras</h3>
+                </div>
+                <p>Grave estruturas padrão (ex: Kit Merenda, Material de Limpeza) para duplicar e economizar tempo nos anos seguintes.</p>
+            </div>
+        </div>
+
+        <div class="cta-split">
+            <div class="cta-visual">
+                <img src="/SECAO-DASH.svg" alt="Licitanest Dashboard" style="width: 100%; max-width: 800px; height: auto; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.1)); transform: scaleX(-1) scale(1.3); transform-origin: center;" loading="lazy" />
+            </div>
+            <div class="cta-content">
+                <h2>Crie Cestas de Preços perfeitas, hoje.</h2>
+                <p>Esqueça os PDFs, e-mails esquecidos e dezenas de guias abertas no navegador. A plataforma do Licitanest centraliza e automatiza a etapa mais desgastante do processo de compras públicas.</p>
+                <a href="contato.html" class="cta-btn">Falar com Especialista</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- LEAD CAPTURE INLINE -->
+    <section class="lead-capture-section section-reveal" id="lead-capture">
+        <div class="lead-capture-container">
+            <div class="lead-capture-header">
+                <h2>Solicite acesso à plataforma</h2>
+                <p>Preencha seus dados e um especialista da Metaclass entrará em contato para apresentar o Licitanest ao seu órgão.</p>
+            </div>
+            <form id="lead-form" class="lead-form" autocomplete="on">
+                <div class="form-group">
+                    <label for="lead-name">Nome completo</label>
+                    <input type="text" id="lead-name" name="nome" placeholder="Seu nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="lead-email">E-mail institucional</label>
+                    <input type="email" id="lead-email" name="email" placeholder="email@orgao.gov.br" required>
+                </div>
+                <div class="form-group">
+                    <label for="lead-phone">Telefone / WhatsApp</label>
+                    <input type="tel" id="lead-phone" name="telefone" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label for="lead-org">Órgão / Instituição</label>
+                    <input type="text" id="lead-org" name="orgao" placeholder="Prefeitura, Câmara, Autarquia..." required>
+                </div>
+                <div class="form-group full-width">
+                    <label for="lead-role">Perfil</label>
+                    <select id="lead-role" name="perfil">
+                        <option value="">Selecione seu perfil</option>
+                        <option value="pregoeiro">Pregoeiro(a)</option>
+                        <option value="agente">Agente de Contratação</option>
+                        <option value="secretario">Secretário(a)</option>
+                        <option value="controlador">Controlador(a) Interno</option>
+                        <option value="gestor">Gestor(a) de Compras</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                <button type="submit" class="lead-form-btn">
+                    Solicitar Acesso
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <p class="lead-form-privacy">Seus dados estão protegidos. Consulte nossa <a href="politica-de-privacidade.html">Política de Privacidade</a>.</p>
+            </form>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section section-reveal" id="faq">
+        <div class="faq-container">
+            <div class="faq-header-top">
+                <div class="faq-badge">● Perguntas Frequentes</div>
+                <h2>Tem Dúvidas?<br><span>Nós Temos as Respostas.</span></h2>
+                <p>Tudo o que você precisa saber sobre a plataforma Licitanest, desde os primeiros passos até conformidade legislativa avançada.</p>
+            </div>
+            <div class="faq-grid-layout">
+                <aside class="faq-sidebar">
+                    <div class="faq-support-box" style="margin-top: 0;">
+                        <div style="background: rgba(255,255,255,0.2); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </div>
+                        <h4>Ficou alguma dúvida específica?</h4>
+                        <p>Nossa equipe de especialistas em contratação pública e tecnologia governamental está pronta para analisar seu cenário.</p>
+                        <a href="contato.html">Falar com Mapeador</a>
+                    </div>
+                </aside>
+                <div class="faq-accordion-container">
+                    <details class="faq-item" open>
+                        <summary>Quão rápido consigo começar a usar a plataforma e montar uma Cesta?</summary>
+                        <div class="faq-content"><p>O onboarding é imediato. Como o Licitanest é puramente SaaS (em nuvem), não há necessidade de instalações locais nos servidores. Em 10 minutos, sua equipe já estará montando, comparando preços e estruturando uma Cesta de Preços completa.</p></div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>O sistema coleta os preços simultaneamente em várias fontes de pesquisa?</summary>
+                        <div class="faq-content"><p>Sim. Nossa inteligência simula a pesquisa nos Painéis de Preços vigentes (Painel Nacional, Banco de Preços em Saúde - BPS), validando o item base, e até mesmo integrando cotações com fornecedores de forma rastreável para preencher as Cestas automaticamente.</p></div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Meus dados processuais estão seguros e em conformidade estrita com a lei?</summary>
+                        <div class="faq-content"><p>Absolutamente. Seguimos as diretrizes da Lei 14.133/21 e da IN 65/2021, garantindo que toda coleta de preço (Painel Nacional e Mídias) contenha o rastro (log) completo, assinatura de tempo e URL de origem (Print Screen em PDF salvo na nuvem), fundamental para amparo jurídico perante os Tribunais de Contas.</p></div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Quais formatos de integração o Licitanest exporta para anexar ao SICOM?</summary>
+                        <div class="faq-content"><p>Nossas Cestas já nascem prontas para integração. Contamos com rotinas de exportação para os TCs (Tribunais de Contas) e licitações eletrônicas em XML, JSON e planilhas .XLSX nativas para compatibilidade imediata com seu portal de pregão preexistente.</p></div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Os membros da CPL precisam de conhecimento técnico avançado ou treinamento longo?</summary>
+                        <div class="faq-content"><p>Não. A interface foi construída seguindo paradigmas dos aplicativos mais fáceis do mercado. Se sua equipe consegue usar um e-mail moderno, conseguirá operar a montagem de Cestas no Licitanest com a assistência da nossa IA contextual interna.</p></div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Como funcionam os limites de usuários por assinatura?</summary>
+                        <div class="faq-content"><p>O Licitanest foca no sucesso do órgão público como um todo. Nossos planos são baseados no volume de Cestas Processuais ou Orçamentos Gerados (Pacotes Mensais) – permitindo logins ilimitados, desde as secretarias mais remotas até Controladoria Geral.</p></div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALCULADORA + FOOTER -->
+    <section class="bottom-unified-section">
+        <div class="calc-wrapper" id="calculadora">
+            <div class="calc-header">
+                <h2>Simulador de Economia Licitanest</h2>
+                <p>Descubra o tempo e os recursos que o seu órgão pode economizar utilizando o motor de Inteligência Artificial da plataforma.</p>
+            </div>
+            <div class="calc-grid">
+                <div class="calc-left">
+                    <div class="calc-section-title">Perfil do Órgão / Instituição</div>
+                    <div class="calc-options-grid">
+                        <button class="calc-option-btn active" data-profile="small" onclick="setProfile('small')">
+                            <div class="calc-op-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg> Pequeno Porte</div>
+                            <div class="calc-op-desc">Prefeitura até 50 mil hab.</div>
+                        </button>
+                        <button class="calc-option-btn" data-profile="medium" onclick="setProfile('medium')">
+                            <div class="calc-op-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path></svg> Médio Porte</div>
+                            <div class="calc-op-desc">Município / Autarquia média</div>
+                        </button>
+                        <button class="calc-option-btn" data-profile="large" onclick="setProfile('large')">
+                            <div class="calc-op-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path></svg> Grande Porte</div>
+                            <div class="calc-op-desc">Capital / Gov. Estadual</div>
+                        </button>
+                        <button class="calc-option-btn" data-profile="tribunal" onclick="setProfile('tribunal')">
+                            <div class="calc-op-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Tribunal / TCE</div>
+                            <div class="calc-op-desc">Alta demanda processual</div>
+                        </button>
+                    </div>
+
+                    <div class="calc-section-title">Cestas de Preços por Mês</div>
+                    <div class="calc-slider-box">
+                        <div class="slider-labels">
+                            <span style="font-size: 0.85rem; color:rgba(255,255,255,0.6);">Menos</span>
+                            <span class="slider-val-display" id="slider-val">10 cestas</span>
+                        </div>
+                        <input type="range" id="calc-range" min="1" max="100" step="1" value="10">
+                    </div>
+
+                    <div class="calc-section-title">Módulos Inteligentes</div>
+                    <div class="add-ons-list">
+                        <div class="addon-row">
+                            <div class="addon-info">
+                                <div class="addon-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path><path d="M14 2v6h6"></path></svg></div>
+                                <div class="addon-text">
+                                    <h4>Motor OCR (Extração de PDF)</h4>
+                                    <p>Automatize extração de cotações</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toggle-ocr">
+                                <span class="ts-slider"></span>
+                            </label>
+                        </div>
+                        <div class="addon-row">
+                            <div class="addon-info">
+                                <div class="addon-icon-box"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
+                                <div class="addon-text">
+                                    <h4>Monitoramento de Preços 24h</h4>
+                                    <p>Alertas de variação automáticos</p>
+                                </div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toggle-monitoring">
+                                <span class="ts-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-right">
+                    <div class="result-box">
+                        <div class="result-top-bar">
+                            <span>Estimativa de Economia</span>
+                            <div class="unit-toggle" onclick="toggleUnit()">
+                                Horas <div class="ut-switch"></div> Reais
+                            </div>
+                        </div>
+                        <div class="result-value-wrapper">
+                            <span class="res-prefix" id="res-prefix"></span>
+                            <span class="res-number" id="res-number">68</span>
+                            <span class="res-suffix" id="res-suffix">horas/mês</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-box">
+                        <div class="breakdown-row">
+                            <span class="bd-label">Processo Manual Estimado</span>
+                            <span class="bd-val" id="bd-manual">80h</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="bd-label">Com Licitanest</span>
+                            <span class="bd-val" id="bd-auto">12h</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="bd-label">Economia c/ Retrabalho</span>
+                            <span class="bd-val" id="bd-rework">10h</span>
+                        </div>
+                    </div>
+                    <div class="total-row">
+                        <span class="bd-label"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> Total Economizado</span>
+                        <span class="bd-val" id="bd-total">68h</span>
+                    </div>
+                    <button class="btn-cta-quote" onclick="window.location.href='contato.html'">
+                        Agendar Demonstração
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="metaclass-footer">
+            <div class="mf-container">
+                <div class="mf-grid">
+                    <div class="mf-logo-col">
+                        <div class="mf-logo-main"><span class="logo-name">licitanest</span><span class="logo-sub">by metaclass</span></div>
+                        <p class="mf-desc">A plataforma de inteligência para compras públicas mais avançada do Brasil. Saneamento, OCR, cestas IN 65 e relatórios complexos em um só lugar.</p>
+                        <div class="mf-badges-mini">
+                            <span class="mf-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> LGPD</span>
+                            <span class="mf-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line></svg> IN 65/2021</span>
+                            <span class="mf-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg> Lei 14.133</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="mf-col-title">Produto</h4>
+                        <ul class="mf-links">
+                            <li><a href="#solucoes">Diferenciais</a></li>
+                            <li><a href="#funcionalidades">Recursos IA</a></li>
+                            <li><a href="#integra_marcas">Integrações</a></li>
+                            <li><a href="contato.html">Agendar Demo</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="mf-col-title">Soluções</h4>
+                        <ul class="mf-links">
+                            <li><a href="contato.html">Prefeituras</a></li>
+                            <li><a href="contato.html">Governo Estadual</a></li>
+                            <li><a href="contato.html">Câmaras Municipais</a></li>
+                            <li><a href="contato.html">Autarquias</a></li>
+                            <li><a href="contato.html">Empresas Fornecedoras</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="mf-col-title">Empresa</h4>
+                        <ul class="mf-links">
+                            <li><a href="contato.html">Contato</a></li>
+                            <li><a href="#faq">FAQ</a></li>
+                            <li><span>Seg-Sex, 9h às 18h</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="mf-col-title">Legal</h4>
+                        <ul class="mf-links">
+                            <li><a href="termos-de-uso.html">Termos de Uso</a></li>
+                            <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
+                            <li><a href="preferencias-de-cookies.html">Preferências de Cookies</a></li>
+                            <li><a href="canal-lgpd.html">Canal LGPD / DPO</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mf-bottom">
+                    <div class="mf-bottom-badges">
+                        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> LGPD Conformidade</span>
+                        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect></svg> Backup Automático</span>
+                        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Criptografia Ponta a Ponta</span>
+                        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Trilha de Auditoria</span>
+                    </div>
+                    <div class="mf-copyright">
+                        <span>&copy; 2026 Licitanest by Metaclass Tecnologia Ltda. Todos os direitos reservados.</span>
+                        <span>Sistema SaaS para inteligência em licitações e contratações públicas.</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </section>
+
+    <!-- WHATSAPP FLOATING BUTTON -->
+    <a href="https://wa.me/5500000000000?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20Licitanest" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+
+    <!-- COOKIE BANNER -->
+    <div id="cookie-banner" class="cookie-banner">
+        <div class="cookie-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+        <div class="cookie-content">
+            <div class="cookie-title">Privacidade e Cookies (LGPD)</div>
+            <p class="cookie-text">Utilizamos cookies estritamente necessários para o funcionamento do site. Consulte nossos <a href="termos-de-uso.html">Termos</a> e <a href="politica-de-privacidade.html">Política</a>.</p>
+        </div>
+        <div class="cookie-actions">
+            <button class="btn-cookie-outline" onclick="rejectCookies()">Recusar</button>
+            <button class="btn-cookie-solid" onclick="acceptCookies()">Aceitar</button>
+            <button class="btn-cookie-close" onclick="closeCookieBanner()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- EXIT INTENT POPUP -->
+    <div id="exit-popup-overlay" class="exit-popup-overlay">
+        <div class="exit-popup">
+            <button class="exit-popup-close" onclick="closeExitPopup()">&times;</button>
+            <div class="exit-popup-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            </div>
+            <h3>Antes de sair...</h3>
+            <p>Receba gratuitamente nosso <strong>Guia Completo da IN 65/2021</strong> com checklist de conformidade para pesquisa de preços.</p>
+            <form id="exit-popup-form" class="exit-popup-form">
+                <input type="email" placeholder="Seu melhor e-mail" required>
+                <button type="submit">Baixar Guia</button>
+            </form>
+            <p class="exit-popup-note">Zero spam. Apenas conteúdo relevante sobre licitações.</p>
+        </div>
+    </div>
+
+    <!-- SCRIPTS (defer para não bloquear renderização) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
+    <script src="js/main.js" defer></script>
+
+</body>
+</html>
