@@ -1,0 +1,230 @@
+
+    <style>
+.bottom-unified-section {
+            background-color: #0d3889;
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #0d3889 0%, #040e2a 100%);
+            background-size: 40px 40px, auto;
+            border-top: none;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            border-radius: 160px 24px 160px 24px;
+            margin: 0 24px 40px 24px;
+            transform: translateZ(0);
+        }
+/* --- FOOTER CLINICNEST METACLASS STYLE --- */
+        .metaclass-footer {
+            background: transparent;
+            padding: 4rem 2rem 2rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Inter', sans-serif;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mf-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 992px) {
+            .mf-grid { grid-template-columns: 1fr 1fr; }
+            .mf-logo-col { grid-column: span 2; }
+        }
+        @media (max-width: 600px) {
+            .mf-grid { grid-template-columns: 1fr; }
+            .mf-logo-col { grid-column: span 1; }
+        }
+
+        .mf-logo-main {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+        .mf-logo-main span { color: #06b6d4; }
+        .mf-logo-sub {
+            font-size: 0.8rem;
+            color: #06b6d4;
+            margin-left: 2.2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .mf-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 320px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-badges-mini {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(13, 56, 137, 0.5);
+            color: #a5f3fc;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .mf-col-title {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .mf-links {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mf-links a, .mf-links span {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .mf-links a:hover {
+            color: #06b6d4;
+        }
+
+        .mf-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mf-bottom-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+        }
+        .mf-bottom-badges span {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .mf-bottom-badges i { color: #06b6d4; }
+
+        .mf-copyright {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+        @media (max-width: 600px) {
+            .mf-copyright { flex-direction: column; gap: 1rem; text-align: center; }
+            .mf-bottom-badges { gap: 1rem; }
+        }
+    
+    </style>
+
+<section class="bottom-unified-section" style="margin: 0; border-radius: 0; margin-top: auto;">
+<!-- FOOTER METACLASS STYLE -->
+        <footer class="metaclass-footer">
+            <div class="mf-container">
+                <div class="mf-grid">
+                    <div class="mf-logo-col">
+                        <div class="mf-logo-main"><span><i data-lucide="activity"></i></span> Licitanest</div>
+                        <span class="mf-logo-sub">by metaclass</span>
+                        <p class="mf-desc">A plataforma de inteligência para compras públicas mais avançada do Brasil. Saneamento, OCR, cestas IN 65 e relatórios complexos em um só lugar.</p>
+                        
+                        <div class="mf-badges-mini">
+                            <span class="mf-badge"><i data-lucide="shield"></i> LGPD</span>
+                            <span class="mf-badge"><i data-lucide="file-check-2"></i> IN 65/2021</span>
+                            <span class="mf-badge"><i data-lucide="layout-dashboard"></i> Lei 14.133</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Produto</h4>
+                        <ul class="mf-links">
+                            <li><a href="#diferenciais">Diferenciais</a></li>
+                            <li><a href="#recursos">Recursos IA</a></li>
+                            <li><a href="#fluxo">Integrações</a></li>
+                            <li><a href="#planos">Preços</a></li>
+                            <li><a href="contato.html">Agendar Demo</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Soluções</h4>
+                        <ul class="mf-links">
+                            <li><a href="#">Prefeituras</a></li>
+                            <li><a href="#">Governo Estadual</a></li>
+                            <li><a href="#">Câmaras Municipais</a></li>
+                            <li><a href="#">Autarquias</a></li>
+                            <li><a href="#">Empresas Fornecedoras</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Empresa</h4>
+                        <ul class="mf-links">
+                            <li><a href="#">Sobre Nós</a></li>
+                            <li><a href="contato.html">Contato</a></li>
+                            <li><a href="#faq">FAQ</a></li>
+                            <li><a href="#">WhatsApp</a></li>
+                            <li><span>Seg-Sex, 9h às 18h</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Legal</h4>
+                        <ul class="mf-links">
+                            <li><a href="termos-de-uso.html">Termos de Uso</a></li>
+                            <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
+                            <li><a href="preferencias-de-cookies.html">Preferências de Cookies</a></li>
+                            <li><a href="canal-lgpd.html">Canal LGPD / DPO</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mf-bottom">
+                    <div class="mf-bottom-badges">
+                        <span><i data-lucide="shield"></i> LGPD Conformidade</span>
+                        <span><i data-lucide="server"></i> Backup Automático AWS</span>
+                        <span><i data-lucide="lock"></i> Criptografia Ponta a Ponta</span>
+                        <span><i data-lucide="pen-tool"></i> Trilha de Auditoria</span>
+                    </div>
+                    <div class="mf-copyright">
+                        <span>© 2026 Licitanest by Metaclass Tecnologia Ltda. Todos os direitos reservados.</span>
+                        <span>Sistema SaaS para inteligência em licitações e contratações públicas.</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    
+</section>

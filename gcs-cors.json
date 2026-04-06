@@ -1,0 +1,13 @@
+[
+  {
+    "origin": [
+      "https://licitanest.web.app",
+      "https://licitanest.firebaseapp.com",
+      "http://localhost:5173",
+      "http://localhost:4173"
+    ],
+    "method": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization", "Content-Length", "Content-Disposition"],
+    "maxAgeSeconds": 3600
+  }
+]

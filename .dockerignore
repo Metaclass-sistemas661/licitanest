@@ -1,0 +1,45 @@
+# node_modules
+node_modules/
+npm-debug.log*
+
+# Build output (will be generated in build step)
+dist/
+
+# Source files desnecessários em produção
+src/test/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+vitest.config.ts
+
+# Dev/CI files
+.eslintrc*
+eslint.config.js
+.prettierrc*
+tsconfig*.json
+.env*
+.git/
+.gitignore
+README.md
+ROADMAP.md
+FICHA_TECNICA_CESTA_PRECOS.md
+*.md
+
+# Supabase local
+supabase/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Landing page (servida separadamente)
+landing/
+
+# Temp
+*.py
+temp_*

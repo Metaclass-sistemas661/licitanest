@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+@theme {
+  /* === PALETA AZUL SAFIRA + ESMERALDA === */
+  
+  /* Base */
+  --color-background: hsl(210 20% 99%);
+  --color-foreground: hsl(220 25% 10%);
+  
+  /* Cards */
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(220 25% 10%);
+  
+  /* Popover */
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(220 25% 10%);
+  
+  /* Primary — Azul Safira #2563EB */
+  --color-primary: hsl(217 91% 53%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  
+  /* Secondary */
+  --color-secondary: hsl(214 32% 95%);
+  --color-secondary-foreground: hsl(220 25% 15%);
+  
+  /* Muted */
+  --color-muted: hsl(214 32% 95%);
+  --color-muted-foreground: hsl(215 16% 47%);
+  
+  /* Accent — Esmeralda #059669 */
+  --color-accent: hsl(160 84% 39%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  
+  /* Success (complementar ao accent) */
+  --color-success: hsl(160 84% 39%);
+  --color-success-foreground: hsl(0 0% 100%);
+  
+  /* Warning — Âmbar */
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-foreground: hsl(0 0% 100%);
+  
+  /* Destructive */
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  
+  /* Borders & Inputs */
+  --color-border: hsl(214 32% 91%);
+  --color-input: hsl(214 32% 91%);
+  --color-ring: hsl(217 91% 53%);
+  --radius: 0.5rem;
+  
+  /* Charts — Safira, Esmeralda, Âmbar, Violeta, Ciano */
+  --color-chart-1: hsl(217 91% 53%);
+  --color-chart-2: hsl(160 84% 39%);
+  --color-chart-3: hsl(38 92% 50%);
+  --color-chart-4: hsl(262 83% 58%);
+  --color-chart-5: hsl(189 94% 43%);
+  
+  /* Sidebar — Azul Marinho escuro */
+  --color-sidebar-background: hsl(220 30% 12%);
+  --color-sidebar-foreground: hsl(214 32% 85%);
+  --color-sidebar-primary: hsl(217 91% 60%);
+  --color-sidebar-primary-foreground: hsl(0 0% 100%);
+  --color-sidebar-accent: hsl(220 25% 18%);
+  --color-sidebar-accent-foreground: hsl(0 0% 100%);
+  --color-sidebar-border: hsl(220 20% 20%);
+  --color-sidebar-ring: hsl(217 91% 53%);
+  --color-sidebar-muted: hsl(215 16% 55%);
+}
+
+/* ── Dark-mode overrides ─────────────────────────────── */
+.dark {
+  --color-background: hsl(222 20% 7%);
+  --color-foreground: hsl(210 20% 93%);
+
+  --color-card: hsl(222 18% 11%);
+  --color-card-foreground: hsl(210 20% 93%);
+
+  --color-popover: hsl(222 18% 11%);
+  --color-popover-foreground: hsl(210 20% 93%);
+
+  --color-primary: hsl(217 91% 60%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  --color-secondary: hsl(220 18% 16%);
+  --color-secondary-foreground: hsl(210 20% 88%);
+
+  --color-muted: hsl(220 18% 16%);
+  --color-muted-foreground: hsl(215 16% 58%);
+
+  --color-accent: hsl(160 74% 44%);
+  --color-accent-foreground: hsl(0 0% 100%);
+
+  --color-success: hsl(160 74% 44%);
+  --color-success-foreground: hsl(0 0% 100%);
+
+  --color-warning: hsl(38 92% 55%);
+  --color-warning-foreground: hsl(0 0% 100%);
+
+  --color-destructive: hsl(0 72% 55%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+
+  --color-border: hsl(220 16% 20%);
+  --color-input: hsl(220 16% 20%);
+  --color-ring: hsl(217 91% 60%);
+
+  --color-chart-1: hsl(217 91% 60%);
+  --color-chart-2: hsl(160 74% 44%);
+  --color-chart-3: hsl(38 92% 55%);
+  --color-chart-4: hsl(262 83% 64%);
+  --color-chart-5: hsl(189 94% 50%);
+
+  --color-sidebar-background: hsl(222 22% 8%);
+  --color-sidebar-foreground: hsl(214 32% 80%);
+  --color-sidebar-primary: hsl(217 91% 60%);
+  --color-sidebar-primary-foreground: hsl(0 0% 100%);
+  --color-sidebar-accent: hsl(220 20% 14%);
+  --color-sidebar-accent-foreground: hsl(0 0% 100%);
+  --color-sidebar-border: hsl(220 16% 16%);
+  --color-sidebar-ring: hsl(217 91% 60%);
+  --color-sidebar-muted: hsl(215 16% 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar fino para sidebar e áreas de scroll */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(220 20% 25%) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(220 20% 25%);
+    border-radius: 4px;
+  }
+}

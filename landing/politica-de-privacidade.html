@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Licitanest - Plataforma Inteligente</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- GSAP for Advanced Animations (Framer-like smooth 3D/Parallax) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            /* Fixando firmemente a cor do azul do sistema Licitanest */
+            --bg-r: 5;
+            --bg-g: 6;
+            --bg-b: 15;
+            --bg-color: rgb(var(--bg-r), var(--bg-g), var(--bg-b));
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.35);
+            --gradient-start: #22d3ee;
+            --gradient-end: #3b82f6;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            /* Fundo cinza clarinho atras da hero */
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* STICKY FLOATING HEADER (Baseado na Referência) */
+        .main-header {
+            position: fixed;
+            top: 40px; /* Colocado para dentro da area da hero section */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 98%;
+            max-width: 1400px; /* Reduzido levemente para forçar a responsividade sem comprimir os itens internos */
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.8rem 1rem 0.8rem 2rem;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 100px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            flex: 1; /* Força o logo a ocupar espaço balanceado garantindo distância do centro */
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 1rem; /* Adiciona respiro na extrema esquerda */
+        }
+
+        .logo span {
+            color: #06b6d4;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+        .logo-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #0d3889;
+        }
+        .logo-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        
+        .main-nav {
+            flex: 2; /* Garante que ocupe o centro como maior bloco */
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem; /* Ajustado para caber sem quebrar linhas */
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+        
+        .main-nav li {
+            white-space: nowrap; /* Impede a quebra de linha (ex: "COMO FUNCIONA") */
+        }
+
+        .main-nav a {
+            text-decoration: none;
+            color: #64748b;
+            font-family: 'Inter', sans-serif; /* Fonte padrão limpa */
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em; /* Reduzido o peso para ficar mais elegante e sério */
+            transition: color 0.2s ease;
+            position: relative;
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            color: #06b6d4;
+        }
+
+        .main-nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: #06b6d4;
+            border-radius: 50%;
+        }
+
+        .header-actions {
+            flex: 1; /* Balanceia com a logo */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Empurra os botões pra ponta direita */
+            gap: 1rem;
+        }
+
+        .login-link {
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .login-link:hover {
+            color: #06b6d4;
+            background-color: #f1f5f9;
+        }
+
+        .header-cta {
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.6rem; /* Ajustado um pouco para caber melhor na tela, mesmo com o ícone */
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem; /* Aumentado um pouco o espaço interno para afastar a seta do texto */
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 1rem;
+            white-space: nowrap; /* Não deixar quebrar  o Solicitar do Acesso na responsividade */
+        }
+        
+        .header-cta svg {
+            flex-shrink: 0; /* Impede a seta de encolher/apertar quando a tela for diminuida */
+            min-width: 18px; /* Força largura mínima do icone */
+            width: 18px;
+            height: 18px;
+        }
+        }
+
+        .header-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .header-cta.secondary {
+            background: transparent;
+            color: #0d3889;
+            border: 1.5px solid #0d3889;
+            box-shadow: none;
+        }
+
+        .header-cta.secondary:hover {
+            background: rgba(13, 56, 137, 0.06);
+            box-shadow: none;
+        }
+
+        @media (max-width: 990px) {
+            .main-nav {
+                display: none; /* Em mobile esconde menu para simplificar ou colocaria menu hambúrguer */
+            }
+            .header-actions .login-link {
+                display: none;
+            }
+            .main-header {
+                top: 20px;
+                padding: 0.6rem;
+                width: calc(100% - 24px);
+                border-radius: 50px;
+            }
+            .logo { flex: 1; font-size: 1.2rem; margin-left: 1rem; }
+            .header-cta { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+        }
+
+        /* Wrapper relativo no fundo claro. A margin simula as bordas do cartão da landing. */
+        .hero-wrapper {
+            position: relative;
+            margin: 24px auto 0 auto; /* Reduzido de volt para 24px para grudar o Header dentro do card Hero Escuro */
+            width: calc(100% - 48px);
+            z-index: 10;
+
+            /* Novas bordas flutuantes ao longo da tela (Formato folha/assimétrico) */
+            border-radius: 160px 24px 160px 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            /* Removendo box-shadow que pode estar gerando o halo branco/claro no limite da caixa */
+            background: #f3f4f6;
+            /* Força cor base no fundo da div para evitar branco */
+            /* Preenche vazios se houver */
+        }
+
+        @media (max-width: 768px) {
+            .hero-wrapper {
+                margin: 24px auto;
+                width: calc(100% - 24px);
+                min-height: calc(100vh - 48px);
+                border-radius: 80px 16px 80px 16px;
+            }
+        }
+
+        .hero {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 8% 5%;
+            /* Adiciona respiro proporcional para o card terminar rente com a margem correta */
+            overflow: hidden;
+            background: var(--bg-color);
+        }
+
+        .hero-bg-map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 25%;
+            transform: scale(1.05);
+            /* Expande 5% pra fora, escondendo bordas de compressão */
+            z-index: 1;
+            pointer-events: none;
+            /* Screen blend: fundo preto do video desaparece contra o bg do hero */
+            mix-blend-mode: screen;
+        }
+
+        /* Escurecedor geral + Transição suave na base para mesclar com a próxima seção */
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                /* Força FADE OUT pro Escuro na Base SEM misturar com cor sólida e deixar que o fundo do Site prevaleça */
+                linear-gradient(0deg, rgba(var(--bg-r), var(--bg-g), var(--bg-b), 1) 0%, rgba(var(--bg-r), var(--bg-g), var(--bg-b), 0.8) 15%, transparent 40%),
+                radial-gradient(circle at 75% 50%, transparent 20%, rgba(var(--bg-r), var(--bg-g), var(--bg-b), 0.7) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Left Content: Copy */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            /* Fica no topo de tudo (acima do vídeo e do overlay) */
+            max-width: 650px;
+            animation: fadeUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+            margin-top: 4rem;
+            /* Descola um pouco do header */
+
+            /* Efeito minimalsita - Sem caixa, apenas o vidro no Badge e nos botões */
+            padding: 1rem 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--gradient-start);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gradient-start);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gradient-start);
+            animation: pulse 2s infinite;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4.25rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            max-width: 90%;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 1.125rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            box-shadow: 0 10px 25px -5px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px -5px var(--accent-glow);
+        }
+
+        .btn-primary:hover::after {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Animações */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+        }
+
+        /* Fake section para criar bloco sólido na rolagem e permitir o Scroll funcionar sem conteúdo */
+        .next-section-placeholder {
+            position: relative;
+            z-index: 10;
+            /* Fica na frente da hero-wrapper que está no z-index: 1 */
+            min-height: 100vh;
+            background: var(--bg-color);
+            /* Fundo opaco */
+            padding: 100px 5%;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            header {
+                padding: 1.5rem 5%;
+            }
+
+            .hero {
+                align-items: flex-start;
+                padding-top: 8rem;
+                padding-bottom: 4rem;
+            }
+
+            .hero-overlay {
+                background: linear-gradient(180deg, rgba(3, 7, 18, 0.95) 0%, rgba(3, 7, 18, 0.85) 50%, rgba(3, 7, 18, 0.4) 100%);
+            }
+
+            .hero-content {
+                max-width: 100%;
+                margin-top: 0;
+                padding: 1rem;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .cta-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* --------------------------------------------------------------------------------
+           NOVA SEÇÃO: INTERACTIVE TABS (BENTO COMPACTO)
+        -------------------------------------------------------------------------------- */
+        .features-tabs {
+            position: relative;
+            background-color: var(--bg-color);
+            padding: 10rem 5%;
+            z-index: 10;
+        }
+
+        .tabs-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 5rem auto;
+        }
+    
+    /* ========================================= */
+    /* 1. HEADER FLUTUANTE (PILL SHAPE - ISLAND) */
+    /* ========================================= */
+    .navbar {
+        top: 24px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 90% !important;
+        max-width: 1200px !important;
+        border-radius: 100px !important;
+        background: rgba(10, 10, 10, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 0.8rem 2.5rem !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    
+    .navbar.scrolled {
+        top: 15px !important;
+        background: rgba(5, 5, 5, 0.85) !important;
+        border-color: rgba(0, 161, 255, 0.3) !important;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 161, 255, 0.15) !important;
+        padding: 0.6rem 2.5rem !important;
+    }
+    
+    @media (max-width: 900px) {
+        .navbar {
+            width: 95% !important;
+            padding: 0.8rem 1.5rem !important;
+            border-radius: 40px !important;
+        }
+    }
+
+    /* ========================================= */
+    /* 2. ANIMAÇÕES DO BANNER (HERO CINEMATIC)   */
+    /* ========================================= */
+    @keyframes heroSlideUp {
+        from { opacity: 0; transform: translateY(50px); filter: blur(5px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    
+    @keyframes heroImageReveal {
+        from { opacity: 0; transform: scale(0.95) translateY(60px); filter: brightness(0.5); }
+        to { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+    }
+
+    /* Target direct elements inside Hero using our classes */
+    .hero-cinematic .badge {
+        animation: heroSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+        opacity: 0;
+    }
+    .hero-cinematic h1 {
+        animation: heroSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        opacity: 0;
+    }
+    .hero-cinematic p {
+        animation: heroSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+        opacity: 0;
+    }
+    .hero-cinematic .hero-actions {
+        animation: heroSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+        opacity: 0;
+    }
+    .hero-cinematic .dash-preview {
+        animation: heroImageReveal 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
+        opacity: 0;
+    }
+    
+</style>
+
+    <style>
+        .legal-hero {
+            background-color: #0d3889;
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #0d3889 0%, #06b6d4 100%);
+            background-size: 40px 40px, auto;
+            padding: 12rem 2rem 6rem;
+            border-radius: 0 0 160px 24px;
+            color: white;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+        }
+
+        .legal-hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 1rem;
+        }
+
+        .legal-hero p {
+            font-size: 1.2rem;
+            color: #e2e8f0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .legal-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .legal-container h2 {
+            color: #0f172a;
+            font-size: 1.8rem;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .legal-container h3 {
+            color: #1e293b;
+            font-size: 1.3rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .legal-container p {
+            margin-bottom: 1.5rem;
+        }
+
+        .legal-container ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .legal-container li {
+            margin-bottom: 0.5rem;
+        }
+
+        
+        
+        /* === FOOTER (Padrão Metaclass) === */
+        /* Incluir a classe inteira do footer de volta para garantir render na pagina limpa */
+        .metaclass-footer {
+            position: relative;
+            padding: 4rem 2rem 2rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            z-index: 2;
+            background-color: transparent;
+            font-family: 'Inter', sans-serif;
+            color: #cbd5e1;
+        }
+        .metaclass-footer-container { max-width: 1200px; margin: 0 auto; }
+        .m-footer-top { display: grid; grid-template-columns: 350px 1fr; gap: 4rem; margin-bottom: 3rem; }
+        .m-brand-col .m-logo { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; }
+        .m-logo-main { display: flex; align-items: center; gap: 0.8rem; font-size: 1.6rem; font-weight: 800; color: white; font-family: 'Space Grotesk', sans-serif; }
+        .m-logo-main svg { color: #06b6d4; }
+        .m-logo-sub { font-size: 0.75rem; color: #94a3b8; margin-left: 2.8rem; margin-top: -0.3rem; letter-spacing: 0.5px; }
+        .m-brand-desc { font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+        .m-badges { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+        .m-badge { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.05); font-size: 0.8rem; color: #06b6d4; }
+        .m-links-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+        .m-col h4 { color: white; font-weight: 600; font-size: 1rem; margin-bottom: 1.5rem; }
+        .m-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+        .m-col a { color: #94a3b8; text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+        .m-col a:hover { color: #06b6d4; }
+        .m-col .m-time { color: #64748b; font-size: 0.9rem; }
+        .m-footer-bottom { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .m-bottom-badges { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; font-size: 0.85rem; color: #94a3b8; }
+        .m-bottom-badges span { display: flex; align-items: center; gap: 0.4rem; }
+        .m-bottom-badges svg { color: #06b6d4; }
+        .m-copyright { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #64748b; }
+        @media (max-width: 992px) { .m-footer-top { grid-template-columns: 1fr; } .m-links-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .m-links-grid { grid-template-columns: 1fr; } .m-copyright { flex-direction: column; gap: 1rem; text-align: center; } .m-bottom-badges { gap: 1rem; } }
+    </style>
+<style>
+
+
+
+        .mf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mf-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 992px) {
+            .mf-grid { grid-template-columns: 1fr 1fr; }
+            .mf-logo-col { grid-column: span 2; }
+        }
+        @media (max-width: 600px) {
+            .mf-grid { grid-template-columns: 1fr; }
+            .mf-logo-col { grid-column: span 1; }
+        }
+
+        .mf-logo-main {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+        .mf-logo-main span { color: #06b6d4; }
+        .mf-logo-sub {
+            font-size: 0.8rem;
+            color: #06b6d4;
+            margin-left: 2.2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .mf-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 320px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-badges-mini {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(13, 56, 137, 0.5);
+            color: #a5f3fc;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .mf-col-title {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .mf-links {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mf-links a, .mf-links span {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .mf-links a:hover {
+            color: #06b6d4;
+        }
+
+        .mf-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mf-bottom-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+        }
+        .mf-bottom-badges span {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .mf-bottom-badges i { color: #06b6d4; }
+
+        .mf-copyright {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+        @media (max-width: 600px) {
+            .mf-copyright { flex-direction: column; gap: 1rem; text-align: center; }
+            .mf-bottom-badges { gap: 1rem; }
+        }
+    
+    </style>
+    <!-- ========================================= -->
+    <!-- CALCULADORA DE ECONOMIA E FOOTER UNIFICADOS -->
+    <!-- ========================================= -->
+    <style>
+        .bottom-unified-section {
+            background-color: #0d3889;
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #0d3889 0%, #040e2a 100%);
+            background-size: 40px 40px, auto;
+            border-top: none;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            border-radius: 160px 24px 160px 24px;
+            margin: 0 24px 40px 24px;
+            transform: translateZ(0);
+        }
+
+        /* --- CALCULADORA AREA --- */
+        .calc-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .calc-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .calc-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .calc-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            background: transparent;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        @media (max-width: 900px) {
+            .calc-grid { grid-template-columns: 1fr; }
+        }
+
+        .calc-left {
+            padding: 3rem;
+            background: transparent;
+        }
+
+        .calc-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .calc-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (max-width: 500px) {
+            .calc-options-grid { grid-template-columns: 1fr; }
+        }
+
+        .calc-option-btn {
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .calc-option-btn:hover { border-color: rgba(255, 255, 255, 0.3); }
+        .calc-option-btn.active {
+            border-color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+        }
+
+        .calc-op-title { font-weight: 600; color: #ffffff; font-size: 0.95rem; display:flex; align-items: center; gap: 0.5rem; }
+        .calc-op-title svg { width: 18px; height: 18px; color: #06b6d4; }
+        .calc-op-desc { font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); line-height: 1.4; }
+
+        /* Range Slider */
+        .calc-slider-box {
+            margin-bottom: 2.5rem;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .slider-val-display {
+            font-weight: 700;
+            color: #a5f3fc;
+            background: rgba(6, 182, 212, 0.15);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #06b6d4;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.2);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+
+        /* Toggles */
+        .add-ons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .addon-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .addon-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .addon-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(6, 182, 212, 0.1);
+            color: #00829b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .addon-text h4 { margin: 0 0 0.2rem 0; font-size: 0.95rem; color: #ffffff; }
+        .addon-text p { margin: 0; font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .ts-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .ts-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: #f8fafc;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        input:checked + .ts-slider { background-color: #06b6d4; }
+        input:checked + .ts-slider:before { transform: translateX(20px); }
+
+        /* --- RIGHT SIDE --- */
+        .calc-right {
+            padding: 3rem;
+            background: transparent;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .result-box {
+            background: #0d3889; /* A caixa de resultado é azul escuro! */
+            background-image: linear-gradient(135deg, #0d3889 0%, #040e2a 100%);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-box::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+            pointer-events: none;
+        }
+
+        .result-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-top-bar span {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .unit-toggle {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .unit-toggle .ut-switch {
+            width: 36px; height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        .unit-toggle .ut-switch::after {
+            content: ''; position: absolute;
+            width: 14px; height: 14px;
+            background: white; border-radius: 50%;
+            top: 3px; left: 3px; transition: 0.3s;
+        }
+        .unit-toggle.is-brl .ut-switch::after {
+            transform: translateX(16px);
+        }
+
+        .result-value-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 0.5rem;
+            color: white;
+        }
+
+        .res-prefix { font-size: 1.5rem; font-weight: 500; color: #a5f3fc; }
+        .res-number { font-size: 4rem; font-weight: 800; font-family: 'Space Grotesk', sans-serif; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .res-suffix { font-size: 1rem; color: #94a3b8; font-weight: 500; }
+
+        .breakdown-box {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .breakdown-row .bd-label { color: rgba(255, 255, 255, 0.6); }
+        .breakdown-row .bd-val { color: #ffffff; font-weight: 600; }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        .total-row .bd-label { font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: 0.5rem; }
+        .total-row .bd-val { font-weight: 800; color: #a5f3fc; }
+
+        .btn-cta-quote {
+            width: 100%;
+            background: linear-gradient(135deg, #0d3889 0%, #06b6d4 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-cta-quote:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        /* --- FOOTER CLINICNEST METACLASS STYLE --- */
+        .metaclass-footer {
+            background: transparent;
+            padding: 4rem 2rem 2rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Inter', sans-serif;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mf-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 992px) {
+            .mf-grid { grid-template-columns: 1fr 1fr; }
+            .mf-logo-col { grid-column: span 2; }
+        }
+        @media (max-width: 600px) {
+            .mf-grid { grid-template-columns: 1fr; }
+            .mf-logo-col { grid-column: span 1; }
+        }
+
+        .mf-logo-main {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+        .mf-logo-main span { color: #06b6d4; }
+        .mf-logo-sub {
+            font-size: 0.8rem;
+            color: #06b6d4;
+            margin-left: 2.2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .mf-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 320px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-badges-mini {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(13, 56, 137, 0.5);
+            color: #a5f3fc;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .mf-col-title {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .mf-links {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mf-links a, .mf-links span {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .mf-links a:hover {
+            color: #06b6d4;
+        }
+
+        .mf-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mf-bottom-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+        }
+        .mf-bottom-badges span {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .mf-bottom-badges i { color: #06b6d4; }
+
+        .mf-copyright {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+        @media (max-width: 600px) {
+            .mf-copyright { flex-direction: column; gap: 1rem; text-align: center; }
+            .mf-bottom-badges { gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<header class="main-header">
+        <a href="index.html" class="logo">
+            <div class="logo-text"><span class="logo-name">licitanest</span><span class="logo-sub">by metaclass</span></div>
+        </a>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html#hero" class="active">Início</a></li>
+                <li><a href="index.html#solucoes">Soluções</a></li>
+                <li><a href="index.html#processo">Como Funciona</a></li>
+                <li><a href="index.html#funcionalidades">Funcionalidades</a></li>
+                <li><a href="index.html#depoimentos">Depoimentos</a></li>
+                <li><a href="index.html#faq">FAQ</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-actions">
+            <!-- Simulação de icones auxiliares (busca ou portal) antes do botao, cor do sistema -->
+            <a href="contato.html" class="header-cta secondary">
+                <span>Solicitar Acesso</span>
+            </a>
+            <a href="login.html" class="header-cta">
+                <span>Entrar</span>
+            </a>
+        </div>
+    </header>
+    <section class="legal-hero">
+        <div class="legal-hero-content">
+            <h1>Política de Privacidade</h1>
+            <p>Como a Metaclass processa os dados da sua instituição.</p>
+        </div>
+    </section>
+    
+    <div class="legal-container">
+<h2>1. Introdução</h2>
+<p>A Metaclass Tecnologia Ltda. ("Licitanest", "nós", "nosso") está comprometida em proteger a privacidade e os dados pessoais de nossos usuários. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações quando você utiliza nossa plataforma de gestão de processos licitatórios e contratação pública.</p>
+<p>Esta política está em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018), o Marco Civil da Internet (Lei nº 12.965/2014) e legislações aplicáveis ao tratamento de dados públicos.</p>
+
+<h2>2. Dados que Coletamos</h2>
+<h3>2.1 Dados de Cadastro</h3>
+<ul>
+    <li>Nome completo, cargo e dados de identificação do servidor/agente de contratação</li>
+    <li>E-mail institucional/governamental e telefone de contato</li>
+    <li>Matrícula funcional / Siape (se aplicável para vínculo)</li>
+    <li>Dados do Órgão Público ou CNPJ da empresa</li>
+</ul>
+<h3>2.2 Dados de Licitações, Editais e Fornecedores</h3>
+<p>Os dados processados na elaboração de Cestas de Preços, documentos OCR ou dados provenientes dos Portais de Transparência são gerenciados pelos usuários da plataforma. O Licitanest atua como <strong>operador</strong> desses dados, sendo o ente ou órgão o <strong>controlador</strong>. Isso pode incluir:</p>
+<ul>
+    <li>Histórico de compras e editais</li>
+    <li>Assinaturas, cotações e propostas comerciais</li>
+    <li>Informações financeiras relacionadas aos processos de dispensa e pregões</li>
+</ul>
+<h3>2.3 Dados de Uso</h3>
+<ul>
+    <li>Logs de acesso, trilha de auditoria e navegação no sistema</li>
+    <li>Endereço IP e informações relativas ao dispositivo e ambiente de uso</li>
+</ul>
+
+<h2>3. Finalidades do Tratamento e Base Legal</h2>
+<p>Utilizamos os dados primordialmente para prover a plataforma. Segundo o Art. 7º da LGPD e regulamentações de contratação pública, usamos os dados para:</p>
+<ul>
+    <li><strong>Execução de contrato / Políticas Públicas:</strong> Prestação dos serviços do Licitanest.</li>
+    <li><strong>Legítimo Interesse:</strong> Melhorar o motor de IA e os algoritmos de reconhecimento OCR mediante treinamento seguro da plataforma; prevenção à fraude; segurança de infraestrutura.</li>
+    <li><strong>Obrigação legal:</strong> Manutenção de trilhas de auditoria para órgãos de controle (TCU, TCE).</li>
+</ul>
+
+<h2>4. Compartilhamento de Dados</h2>
+<p>O Licitanest pode compartilhar informações estritamente necessárias com:</p>
+<ul>
+    <li><strong>Provedores de Infraestrutura:</strong> Bancos de dados em nuvem seguros (Google Cloud Platform, Firebase), responsáveis por armazenamento criptografado.</li>
+    <li><strong>Bases Governamentais e APIs Abertas:</strong> Integrações em tempo real com PNCP e outros serviços de Transparência que demandem cruzamento de dados públicos.</li>
+    <li><strong>Autoridades e Órgãos de Controle (TCU / TCE):</strong> Quando exigido por lei, auditoria de licitações ou ordem judicial.</li>
+</ul>
+
+<h2>5. Retenção e Segurança dos Dados</h2>
+<p>Implementamos rigorosas medidas técnicas (Criptografia em trânsito e repouso, Auditoria de Eventos, RBAC e Backups imutáveis) para proteger seus dados institucionais.</p>
+<p>Os dados são retidos conforme as exigências da lei do Arquivo Público Nacional ou durante a vigência do contrato com a Administração Pública. Logs de acesso seguem o prazo mínimo do Marco Civil da Internet.</p>
+
+<h2>6. Direitos do Titular (LGPD)</h2>
+<p>Conforme a LGPD, o usuário/servidor pessoa física tem direito a confirmação de tratamento, acesso, correção corporativa, anonimização e revogação de consentimento.</p>
+<p>Para exercer seus direitos relativos aos próprios dados pessoais registrados na plataforma, visite nosso <strong>Canal LGPD</strong> ou contate nosso DPO via e-mail corporativo: dpo@metaclass.com.br</p>
+
+<h2>7. Alterações e Contato</h2>
+<p>Podemos atualizar esta política. Notificaremos as alterações significativas via painel do Licitanest.</p>
+<p><strong>Metaclass Tecnologia Ltda.</strong><br>
+Endereço: Av. Paulista, 1000 - São Paulo, SP<br>
+DPO Exclusivo: dpo@metaclass.com.br</p>
+</div>
+    
+    
+
+    <style>
+
+
+
+        .mf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mf-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 992px) {
+            .mf-grid { grid-template-columns: 1fr 1fr; }
+            .mf-logo-col { grid-column: span 2; }
+        }
+        @media (max-width: 600px) {
+            .mf-grid { grid-template-columns: 1fr; }
+            .mf-logo-col { grid-column: span 1; }
+        }
+
+        .mf-logo-main {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+        .mf-logo-main span { color: #06b6d4; }
+        .mf-logo-sub {
+            font-size: 0.8rem;
+            color: #06b6d4;
+            margin-left: 2.2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .mf-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 320px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-badges-mini {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(13, 56, 137, 0.5);
+            color: #a5f3fc;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .mf-col-title {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .mf-links {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mf-links a, .mf-links span {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .mf-links a:hover {
+            color: #06b6d4;
+        }
+
+        .mf-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mf-bottom-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+        }
+        .mf-bottom-badges span {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .mf-bottom-badges i { color: #06b6d4; }
+
+        .mf-copyright {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+        @media (max-width: 600px) {
+            .mf-copyright { flex-direction: column; gap: 1rem; text-align: center; }
+            .mf-bottom-badges { gap: 1rem; }
+        }
+    
+    </style>
+
+
+
+
+    <style>
+
+
+
+        .mf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mf-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 992px) {
+            .mf-grid { grid-template-columns: 1fr 1fr; }
+            .mf-logo-col { grid-column: span 2; }
+        }
+        @media (max-width: 600px) {
+            .mf-grid { grid-template-columns: 1fr; }
+            .mf-logo-col { grid-column: span 1; }
+        }
+
+        .mf-logo-main {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+        .mf-logo-main span { color: #06b6d4; }
+        .mf-logo-sub {
+            font-size: 0.8rem;
+            color: #06b6d4;
+            margin-left: 2.2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .mf-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 320px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .mf-badges-mini {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(13, 56, 137, 0.5);
+            color: #a5f3fc;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .mf-col-title {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .mf-links {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mf-links a, .mf-links span {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .mf-links a:hover {
+            color: #06b6d4;
+        }
+
+        .mf-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mf-bottom-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+        }
+        .mf-bottom-badges span {
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .mf-bottom-badges i { color: #06b6d4; }
+
+        .mf-copyright {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+        }
+        @media (max-width: 600px) {
+            .mf-copyright { flex-direction: column; gap: 1rem; text-align: center; }
+            .mf-bottom-badges { gap: 1rem; }
+        }
+    
+    
+        /* Logo text overrides for footer */
+        .mf-logo-main { flex-direction: column !important; align-items: flex-start !important; gap: 0 !important; }
+        .mf-logo-main .logo-name { color: white; font-size: 1.6rem; line-height: 1.2; }
+        .mf-logo-main .logo-sub { color: rgba(255,255,255,0.5); font-size: 0.55rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0; }
+    </style>
+
+    <section class="bottom-unified-section">
+        <!-- FOOTER METACLASS STYLE -->
+        <footer class="metaclass-footer">
+            <div class="mf-container">
+                <div class="mf-grid">
+                    <div class="mf-logo-col">
+                        <div class="mf-logo-main"><span class="logo-name">licitanest</span><span class="logo-sub">by metaclass</span></div>
+                        <p class="mf-desc">A plataforma de inteligência para compras públicas mais avançada do Brasil. Saneamento, OCR, cestas IN 65 e relatórios complexos em um só lugar.</p>
+                        
+                        <div class="mf-badges-mini">
+                            <span class="mf-badge"><i data-lucide="shield"></i> LGPD</span>
+                            <span class="mf-badge"><i data-lucide="file-check-2"></i> IN 65/2021</span>
+                            <span class="mf-badge"><i data-lucide="layout-dashboard"></i> Lei 14.133</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Produto</h4>
+                        <ul class="mf-links">
+                            <li><a href="#diferenciais">Diferenciais</a></li>
+                            <li><a href="#recursos">Recursos IA</a></li>
+                            <li><a href="#fluxo">Integrações</a></li>
+                            <li><a href="#planos">Preços</a></li>
+                            <li><a href="contato.html">Agendar Demo</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Soluções</h4>
+                        <ul class="mf-links">
+                            <li><a href="#">Prefeituras</a></li>
+                            <li><a href="#">Governo Estadual</a></li>
+                            <li><a href="#">Câmaras Municipais</a></li>
+                            <li><a href="#">Autarquias</a></li>
+                            <li><a href="#">Empresas Fornecedoras</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Empresa</h4>
+                        <ul class="mf-links">
+                            <li><a href="#">Sobre Nós</a></li>
+                            <li><a href="contato.html">Contato</a></li>
+                            <li><a href="#faq">FAQ</a></li>
+                            <li><a href="#">WhatsApp</a></li>
+                            <li><span>Seg-Sex, 9h às 18h</span></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="mf-col-title">Legal</h4>
+                        <ul class="mf-links">
+                            <li><a href="termos-de-uso.html">Termos de Uso</a></li>
+                            <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
+                            <li><a href="preferencias-de-cookies.html">Preferências de Cookies</a></li>
+                            <li><a href="canal-lgpd.html">Canal LGPD / DPO</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mf-bottom">
+                    <div class="mf-bottom-badges">
+                        <span><i data-lucide="shield"></i> LGPD Conformidade</span>
+                        <span><i data-lucide="server"></i> Backup Automático</span>
+                        <span><i data-lucide="lock"></i> Criptografia Ponta a Ponta</span>
+                        <span><i data-lucide="pen-tool"></i> Trilha de Auditoria</span>
+                    </div>
+                    <div class="mf-copyright">
+                        <span>© 2026 Licitanest by Metaclass Tecnologia Ltda. Todos os direitos reservados.</span>
+                        <span>Sistema SaaS para inteligência em licitações e contratações públicas.</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </section>
+
+    <div id="cookieBanner" class="cookie-banner">
+        <div class="cookie-icon"><i data-lucide="shield-check"></i></div>
+        <div class="cookie-content">
+            <div class="cookie-title">Privacidade e Cookies (LGPD)</div>
+            <p class="cookie-text">Utilizamos cookies estritamente necessarios para o funcionamento do site. Consulte nossos <a href="termos-de-uso.html">Termos</a> e <a href="politica-de-privacidade.html">Politica</a>.</p>
+        </div>
+        <div class="cookie-actions">
+            <button class="btn-cookie-outline" onclick="acceptCookies('analytics-declined')">Recusar</button>
+            <button class="btn-cookie-solid" onclick="acceptCookies('all')">Aceitar</button>
+            <button class="btn-cookie-close" onclick="closeCookieBanner()">Fechar</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { if(!localStorage.getItem('licitanest_cookies_accepted')) { const banner = document.getElementById('cookieBanner'); if(banner) banner.classList.add('show'); } }, 800); });
+        function acceptCookies(type) { localStorage.setItem('licitanest_cookies_accepted', type); closeCookieBanner(); }
+        function closeCookieBanner() { const banner = document.getElementById('cookieBanner'); if(banner) banner.classList.remove('show'); }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+</body>
+</html>
