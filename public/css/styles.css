@@ -150,7 +150,7 @@ body {
    ----------------------------------------------------------------------- */
 .main-header {
     position: fixed;
-    top: 40px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 98%;
@@ -392,9 +392,9 @@ body {
     .header-actions .header-cta.secondary { display: none; }
     .hamburger-btn { display: flex; }
     .main-header {
-        top: 20px;
+        top: 8px;
         padding: 0.6rem;
-        width: calc(100% - 24px);
+        width: calc(100% - 16px);
         border-radius: 50px;
     }
     .logo { flex: 1; font-size: 1.2rem; margin-left: 1rem; }
@@ -417,10 +417,10 @@ body {
 }
 @media (max-width: 768px) {
     .hero-wrapper {
-        margin: 24px auto;
-        width: calc(100% - 24px);
+        margin: 0;
+        width: 100%;
         min-height: calc(100vh - 48px);
-        border-radius: 80px 16px 80px 16px;
+        border-radius: 0;
     }
 }
 
@@ -759,7 +759,7 @@ body {
     margin-right: -20%;
     margin-bottom: -15%;
     filter: drop-shadow(-40px 60px 80px rgba(0, 0, 0, 0.3)) drop-shadow(0 10px 20px rgba(6, 182, 212, 0.25));
-    transform: translateY(-80px) rotate(-2deg);
+    transform: translateY(0px) rotate(-2deg);
 }
 .cf-image-render:hover {
     filter: drop-shadow(-40px 70px 100px rgba(0, 0, 0, 0.4)) drop-shadow(0 10px 30px rgba(6, 182, 212, 0.4));
@@ -1084,8 +1084,8 @@ body {
 }
 @media (max-width: 768px) {
     .testimonials-section {
-        border-radius: 80px 16px 80px 16px;
-        margin: 0 12px 24px 12px;
+        border-radius: 0;
+        margin: 0;
         padding: 4rem 0 5rem 0;
     }
 }
@@ -1925,6 +1925,12 @@ body {
     margin: 0 24px 40px 24px;
     transform: translateZ(0);
 }
+@media (max-width: 768px) {
+    .bottom-unified-section {
+        border-radius: 0;
+        margin: 0;
+    }
+}
 .calc-wrapper {
     max-width: 1200px;
     margin: 0 auto;
@@ -2510,4 +2516,36 @@ input:checked + .ts-slider:before { transform: translateX(20px); }
     transform-origin: left;
     transform: scaleX(0);
     pointer-events: none;
+}
+
+/* -----------------------------------------------------------------------
+   21. MOBILE FULL-WIDTH OVERRIDES
+   ----------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+    }
+    .clean-features,
+    .process-section,
+    .features-section,
+    .lead-capture-section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .national-map-container,
+    .compliance-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .faq-section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .calc-wrapper {
+        padding: 3rem 1rem;
+    }
+    .footer-inner {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
 }
