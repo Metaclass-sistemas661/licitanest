@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import crypto from "node:crypto";
+import forge from "node-forge";
 import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
@@ -592,16 +593,6 @@ export async function rotasContratosPortal(app: FastifyInstance) {
 
       const { rows } = await pool().query(
         `UPDATE contratos_notificacoes
-         SET lido = TRUE, lido_em = NOW()
-         WHERE id = $1 AND municipio_id = $2
-         RETURNING id`,
-        [id, municipioId],
-      );
-      if (!rows[0]) return reply.status(404).send({ error: "Notificação não encontrada" });
-      reply.send({ data: rows[0] });
-    } catch (e) { tratarErro(e, reply); }
-  });
-
          SET lido = TRUE, lido_em = NOW()
          WHERE id = $1 AND municipio_id = $2
          RETURNING id`,

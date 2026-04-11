@@ -136,6 +136,11 @@ export default [
         { prefer: "type-imports" },
       ],
       ...reactHooks.configs.recommended.rules,
+      // React 19 hooks rules: warn-only (too aggressive for existing codebase)
+      "react-hooks/purity": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/refs": "warn",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
@@ -234,10 +239,39 @@ export default [
     },
   },
 
+  // Configuração para E2E tests (Playwright)
+  {
+    files: ["e2e/**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+      globals: {
+        console: "readonly",
+        process: "readonly",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-console": "off",
+    },
+  },
+
   // Configuração para arquivos de config (vite, eslint, vitest, etc.)
   {
     files: ["*.config.{js,ts}", "*.config.*.{js,ts}"],
     languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
       globals: {
         __dirname: "readonly",
         __filename: "readonly",
@@ -245,6 +279,12 @@ export default [
         module: "readonly",
         require: "readonly",
       },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
     },
   },
 

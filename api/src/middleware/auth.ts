@@ -8,6 +8,8 @@ export interface UsuarioRequest {
   servidor: {
     id: string;
     nome: string;
+    cpf: string | null;
+    data_nascimento: string | null;
     perfil_id: string;
     perfil_nome: string;
     permissoes: Record<string, boolean> | null;
@@ -39,7 +41,7 @@ export async function verificarAuth(
     const decoded = await getAuth().verifyIdToken(token);
 
     const { rows } = await getPool().query(
-      `SELECT s.id, s.nome, s.perfil_id, p.nome AS perfil_nome, p.permissoes,
+      `SELECT s.id, s.nome, s.cpf, s.data_nascimento, s.perfil_id, p.nome AS perfil_nome, p.permissoes,
               s.secretaria_id, sec.municipio_id, u.nivel_govbr, s.is_superadmin
        FROM servidores s
        JOIN perfis p ON s.perfil_id = p.id
