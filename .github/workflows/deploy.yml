@@ -153,7 +153,7 @@ jobs:
           docker push ${{ env.API_IMAGE }}:latest
 
       - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
+        uses: google-github-actions/deploy-cloudrun@v3
         with:
           service: licitanest-api
           region: ${{ env.GCP_REGION }}
