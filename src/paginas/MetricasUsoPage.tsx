@@ -9,20 +9,17 @@ import {
   Clock,
   Loader2,
   RefreshCw,
-  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { buscarMetricasUso, atualizarMetricasUso } from "@/servicos/metricasUso";
-import { buscarAssinatura, formatarMoeda } from "@/servicos/billing";
-import type { MetricasUsoMunicipio, Assinatura, Plano } from "@/tipos";
+import type { MetricasUsoMunicipio } from "@/tipos";
 
 export function MetricasUsoPage() {
   const { servidor } = useAuth();
   const municipioId = servidor?.secretaria?.municipio_id;
 
   const [metricas, setMetricas] = useState<MetricasUsoMunicipio | null>(null);
-  const [assinatura, setAssinatura] = useState<(Assinatura & { plano?: Plano }) | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [atualizando, setAtualizando] = useState(false);
 
@@ -34,12 +31,8 @@ export function MetricasUsoPage() {
     if (!municipioId) return;
     setCarregando(true);
     try {
-      const [m, a] = await Promise.all([
-        buscarMetricasUso(municipioId),
-        buscarAssinatura(municipioId),
-      ]);
+      const m = await buscarMetricasUso(municipioId);
       setMetricas(m);
-      setAssinatura(a);
     } catch {
       /* toast */
     } finally {
@@ -66,15 +59,6 @@ export function MetricasUsoPage() {
     );
   }
 
-  const plano = assinatura?.plano;
-  const limites = plano
-    ? {
-        usuarios: plano.limite_usuarios,
-        cestas: plano.limite_cestas,
-        cotacoes: plano.limite_cotacoes_mes,
-      }
-    : { usuarios: 999, cestas: 999, cotacoes: 999 };
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -85,7 +69,7 @@ export function MetricasUsoPage() {
             Métricas de Uso
           </h1>
           <p className="text-gray-500 mt-1">
-            Acompanhe o consumo do seu município em relação aos limites do plano.
+            Acompanhe o consumo do seu município.
           </p>
         </div>
         <button
@@ -98,42 +82,24 @@ export function MetricasUsoPage() {
         </button>
       </div>
 
-      {/* Plano Info */}
-      {plano && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4 flex items-center justify-between">
-          <div>
-            <span className="text-sm text-blue-600 font-medium">Plano atual:</span>
-            <span className="ml-2 text-lg font-bold text-gray-900">{plano.titulo}</span>
-          </div>
-          <div className="text-right">
-            <span className="text-sm text-gray-500">
-              {formatarMoeda(assinatura!.valor_corrente)}/{assinatura!.intervalo}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Barras de uso */}
+      {/* Visão geral de uso */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <UsageBar
+        <MetricCard
           titulo="Usuários"
+          valor={metricas?.total_usuarios ?? 0}
           icone={Users}
-          atual={metricas?.total_usuarios ?? 0}
-          limite={limites.usuarios}
           cor="blue"
         />
-        <UsageBar
+        <MetricCard
           titulo="Cestas de Preços"
+          valor={metricas?.total_cestas ?? 0}
           icone={ShoppingCart}
-          atual={metricas?.total_cestas ?? 0}
-          limite={limites.cestas}
           cor="green"
         />
-        <UsageBar
+        <MetricCard
           titulo="Cotações / mês"
+          valor={metricas?.cotacoes_ultimo_mes ?? 0}
           icone={FileText}
-          atual={metricas?.cotacoes_ultimo_mes ?? 0}
-          limite={limites.cotacoes}
           cor="purple"
         />
       </div>
@@ -171,55 +137,6 @@ export function MetricasUsoPage() {
         <div className="flex items-center gap-2 text-sm text-gray-400">
           <Clock className="h-4 w-4" />
           Última atualização: {new Date(metricas.atualizado_em).toLocaleString("pt-BR")}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Usage Bar ──────────────────────────────────────────────
-function UsageBar({
-  titulo,
-  icone: Icon,
-  atual,
-  limite,
-  cor,
-}: {
-  titulo: string;
-  icone: React.ElementType;
-  atual: number;
-  limite: number;
-  cor: "blue" | "green" | "purple";
-}) {
-  const ilimitado = limite >= 999;
-  const pct = ilimitado ? 0 : Math.min((atual / limite) * 100, 100);
-  const alerta = !ilimitado && pct >= 80;
-
-  const corMap = {
-    blue: "bg-blue-500",
-    green: "bg-green-500",
-    purple: "bg-purple-500",
-  };
-
-  return (
-    <div className="bg-white rounded-xl border p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Icon className="h-4 w-4 text-gray-500" />
-        <span className="text-sm font-medium text-gray-700">{titulo}</span>
-        {alerta && <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 ml-auto" />}
-      </div>
-      <div className="flex items-end gap-1">
-        <span className="text-2xl font-bold text-gray-900">{atual}</span>
-        <span className="text-sm text-gray-400 mb-0.5">
-          / {ilimitado ? "∞" : limite}
-        </span>
-      </div>
-      {!ilimitado && (
-        <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className={cn("h-full rounded-full transition-all", alerta ? "bg-yellow-500" : corMap[cor])}
-            style={{ width: `${pct}%` }}
-          />
         </div>
       )}
     </div>

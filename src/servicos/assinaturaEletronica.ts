@@ -119,6 +119,9 @@ interface DadosPDFCotacao {
     data: string;
     ip: string;
     user_agent: string;
+    tipo_assinatura?: "simples" | "icp-brasil";
+    certificado_subject?: string;
+    certificado_tipo?: string;
   };
 }
 
@@ -315,8 +318,17 @@ export async function gerarPDFCotacaoFornecedor(
       `IP de origem: ${dados.assinatura.ip}`,
       `Agente: ${dados.assinatura.user_agent.slice(0, 80)}`,
       "",
-      "Este documento possui assinatura eletrônica conforme Medida Provisória nº 2.200-2/2001",
-      "e possui validade jurídica quando as partes concordam com sua utilização.",
+      ...(dados.assinatura.tipo_assinatura === "icp-brasil"
+        ? [
+          `Certificado ICP-Brasil: ${dados.assinatura.certificado_subject ?? "N/A"}`,
+          `Tipo: ${dados.assinatura.certificado_tipo ?? "A1/A3"}`,
+          "Este documento foi assinado digitalmente com certificado ICP-Brasil,",
+          "conforme Medida Provisória nº 2.200-2/2001 (Art. 10, §1º).",
+        ]
+        : [
+          "Este documento possui assinatura eletrônica conforme Medida Provisória nº 2.200-2/2001",
+          "e possui validade jurídica quando as partes concordam com sua utilização.",
+        ]),
     ];
 
     for (const line of assinInfo) {

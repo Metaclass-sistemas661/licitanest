@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 /**
  * Simulação local de sugestões de fontes por IA.
- * Em produção, seria substituído por chamada a API (OpenAI, Claude, etc.)
+ * Em produção, será conectado ao Vertex AI (Google Gemini).
  */
 function simularSugestaoIA(descricaoProduto: string): RespostaIA {
   const desc = descricaoProduto.toLowerCase();
@@ -129,7 +129,7 @@ export function SugestaoFontesIAPage() {
           </p>
           <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-3 py-1 text-xs font-medium dark:bg-amber-900/30 dark:text-amber-400">
             <Brain className="h-3 w-3" />
-            Modo demonstração — Em produção, será conectado a GPT/Claude API
+            Modo demonstração — Em produção, conectado ao Vertex AI
           </div>
         </div>
 

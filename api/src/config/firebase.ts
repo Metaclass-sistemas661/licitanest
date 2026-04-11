@@ -13,3 +13,7 @@ export function inicializarFirebase(): admin.app.App {
 export function getAuth(): admin.auth.Auth {
   return admin.auth(app);
 }
+
+export function getMessaging(): admin.messaging.Messaging {
+  return admin.messaging(app);
+}

@@ -2,11 +2,14 @@ import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contextos/AuthContexto";
 import { PrivateRoute } from "@/componentes/auth/PrivateRoute";
+import { SuperAdminGuard } from "@/componentes/auth/SuperAdminGuard";
 import { AppLayout } from "@/componentes/layout/AppLayout";
+import { SuperAdminLayout } from "@/componentes/layout/SuperAdminLayout";
 import { Toaster } from "sonner";
 import { PageLoader } from "@/componentes/ui/page-loader";
 import { ErrorBoundary } from "@/componentes/ui/error-boundary";
 import { PwaInstallBanner, PwaUpdateBanner, OfflineIndicator } from "@/componentes/pwa";
+import { AceiteTermosModal } from "@/componentes/auth/AceiteTermosModal";
 
 /* ── Enterprise lazy loader with per-chunk retry + cache bust ── */
 async function purgeSwCaches(): Promise<void> {
@@ -78,8 +81,6 @@ const OcrCotacoesPage = lazyRetry(() => import("@/paginas/OcrCotacoesPage"), "Oc
 
 /* ── Phase 14 — Multi-Tenancy & Escalabilidade ───────── */
 const OnboardingPage = lazyRetry(() => import("@/paginas/OnboardingPage"), "OnboardingPage");
-const BillingPage = lazyRetry(() => import("@/paginas/BillingPage"), "BillingPage");
-const AdminMetaclassPage = lazyRetry(() => import("@/paginas/AdminMetaclassPage"), "AdminMetaclassPage");
 const MetricasUsoPage = lazyRetry(() => import("@/paginas/MetricasUsoPage"), "MetricasUsoPage");
 
 /* ── Phase 15 — Mobile / PWA ─────────────────────── */
@@ -87,6 +88,29 @@ const NotificacoesPage = lazyRetry(() => import("@/paginas/NotificacoesPage"), "
 
 /* ── Phase 16 — Consolidação & Qualidade ─────────── */
 const ApiPublicaPage = lazyRetry(() => import("@/paginas/ApiPublicaPage"), "ApiPublicaPage");
+
+/* ── Páginas órfãs registradas ────────────────────── */
+const LGPDPage = lazyRetry(() => import("@/paginas/LGPDPage"), "LGPDPage");
+const ChecklistINPage = lazyRetry(() => import("@/paginas/ChecklistINPage"), "ChecklistINPage");
+const CatmatPage = lazyRetry(() => import("@/paginas/CatmatPage"), "CatmatPage");
+const ImportacaoLotePage = lazyRetry(() => import("@/paginas/ImportacaoLotePage"), "ImportacaoLotePage");
+const WorkflowPage = lazyRetry(() => import("@/paginas/WorkflowPage"), "WorkflowPage");
+const IAAssistentePage = lazyRetry(() => import("@/paginas/IAAssistentePage"), "IAAssistentePage");
+
+/* ── Phase 8 — Portal de Contratos (Município) ──────── */
+const ContratosPortalPage = lazyRetry(() => import("@/paginas/ContratosPortalPage"), "ContratosPortalPage");
+const ContratoDetalhePortalPage = lazyRetry(() => import("@/paginas/ContratoDetalhePortalPage"), "ContratoDetalhePortalPage");
+
+/* ── SuperAdmin pages ────────────────────────────────── */
+const SuperAdminDashboardPage = lazyRetry(() => import("@/paginas/superadmin/SuperAdminDashboardPage"), "SuperAdminDashboardPage");
+const PrefeiturasPage = lazyRetry(() => import("@/paginas/superadmin/PrefeiturasPage"), "PrefeiturasPage");
+const UsuariosGlobalPage = lazyRetry(() => import("@/paginas/superadmin/UsuariosGlobalPage"), "UsuariosGlobalPage");
+const SAContratosPage = lazyRetry(() => import("@/paginas/superadmin/ContratosPage"), "ContratosPage");
+const ContratoEditorPage = lazyRetry(() => import("@/paginas/superadmin/ContratoEditorPage"), "ContratoEditorPage");
+const FaturasPage = lazyRetry(() => import("@/paginas/superadmin/FaturasPage"), "FaturasPage");
+const AuditLogPage = lazyRetry(() => import("@/paginas/superadmin/AuditLogPage"), "AuditLogPage");
+const ConfiguracoesSuperAdminPage = lazyRetry(() => import("@/paginas/superadmin/ConfiguracoesSuperAdminPage"), "ConfiguracoesSuperAdminPage");
+const MonitoramentoPage = lazyRetry(() => import("@/paginas/superadmin/MonitoramentoPage"), "MonitoramentoPage");
 
 function App() {
   return (
@@ -96,14 +120,20 @@ function App() {
       <PwaInstallBanner />
       <PwaUpdateBanner />
 
-      {/* Toaster global — sonner */}
+      {/* LGPD — Aceite obrigatório de termos */}
+      <AceiteTermosModal />
+
+      {/* Toaster global — sonner (premium) */}
       <Toaster
         position="top-right"
         richColors
         closeButton
         toastOptions={{
           duration: 4000,
-          className: "font-sans",
+          className: "font-sans backdrop-blur-sm shadow-lg rounded-xl border",
+          style: {
+            borderRadius: "0.75rem",
+          },
         }}
       />
 
@@ -145,21 +175,39 @@ function App() {
               <Route path="sugestao-fontes-ia" element={<SugestaoFontesIAPage />} />
               <Route path="ocr-cotacoes" element={<OcrCotacoesPage />} />
 
+              {/* Páginas anteriormente órfãs */}
+              <Route path="lgpd" element={<LGPDPage />} />
+              <Route path="checklist-in" element={<ChecklistINPage />} />
+              <Route path="catmat" element={<CatmatPage />} />
+              <Route path="workflow" element={<WorkflowPage />} />
+              <Route path="ia-assistente" element={<IAAssistentePage />} />
+
+              {/* Phase 8 — Portal de Contratos (Município) */}
+              <Route path="contratos" element={
+                <PrivateRoute perfisPermitidos={["administrador"]}>
+                  <ContratosPortalPage />
+                </PrivateRoute>
+              } />
+              <Route path="contratos/:id" element={
+                <PrivateRoute perfisPermitidos={["administrador"]}>
+                  <ContratoDetalhePortalPage />
+                </PrivateRoute>
+              } />
+
               {/* Phase 14 — Multi-Tenancy */}
-              <Route path="billing" element={<BillingPage />} />
               <Route path="metricas-uso" element={<MetricasUsoPage />} />
               <Route path="notificacoes" element={<NotificacoesPage />} />
               <Route path="api-publica" element={<ApiPublicaPage />} />
+
+              {/* Apenas administrador / gestor */}
               <Route
-                path="admin-metaclass"
+                path="importacao-lote"
                 element={
-                  <PrivateRoute perfisPermitidos={["administrador"]}>
-                    <AdminMetaclassPage />
+                  <PrivateRoute perfisPermitidos={["administrador", "gestor"]}>
+                    <ImportacaoLotePage />
                   </PrivateRoute>
                 }
               />
-
-              {/* Apenas administrador / gestor */}
               <Route
                 path="painel-gestor"
                 element={
@@ -178,6 +226,35 @@ function App() {
               />
             </Route>
           </Route>
+
+          {/* ── Rotas SuperAdmin ─────────────────────────────── */}
+          <Route element={<SuperAdminGuard />}>
+            <Route path="/superadmin" element={<SuperAdminLayout />}>
+              <Route index element={<SuperAdminDashboardPage />} />
+              <Route path="prefeituras" element={<PrefeiturasPage />} />
+              <Route path="usuarios" element={<UsuariosGlobalPage />} />
+              <Route path="contratos" element={<SAContratosPage />} />
+              <Route path="contratos/novo" element={<ContratoEditorPage />} />
+              <Route path="contratos/:id/editar" element={<ContratoEditorPage />} />
+              <Route path="faturas" element={<FaturasPage />} />
+              <Route path="audit-log" element={<AuditLogPage />} />
+              <Route path="monitoramento" element={<MonitoramentoPage />} />
+              <Route path="configuracoes" element={<ConfiguracoesSuperAdminPage />} />
+            </Route>
+          </Route>
+
+          {/* ── 404 — Rota não encontrada ─────────────────── */}
+          <Route path="*" element={
+            <div className="flex min-h-screen items-center justify-center bg-background">
+              <div className="text-center space-y-4">
+                <h1 className="text-6xl font-bold text-muted-foreground">404</h1>
+                <p className="text-lg text-muted-foreground">Página não encontrada</p>
+                <a href="/" className="inline-block rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+                  Voltar ao início
+                </a>
+              </div>
+            </div>
+          } />
         </Routes>
         </Suspense>
       </ErrorBoundary>

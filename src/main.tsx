@@ -13,6 +13,51 @@ import "./index.css";
 // Inicializar Sentry antes de renderizar
 initSentry();
 
+// ── Global error handlers para monitoramento ──
+window.onerror = (message, source, lineno, colno, error) => {
+  try {
+    const payload = {
+      origem: "frontend",
+      severidade: "error",
+      mensagem: typeof message === "string" ? message : "Erro desconhecido",
+      stack_trace: error?.stack?.slice(0, 5000) ?? null,
+      arquivo: source ?? null,
+      linha: lineno ?? null,
+      coluna: colno ?? null,
+      modulo: "window.onerror",
+      url_requisicao: window.location.href,
+      user_agent: navigator.userAgent,
+    };
+    navigator.sendBeacon?.(
+      "/api/log-erro",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+    );
+  } catch {
+    // best-effort
+  }
+};
+
+window.onunhandledrejection = (event: PromiseRejectionEvent) => {
+  try {
+    const error = event.reason;
+    const payload = {
+      origem: "frontend",
+      severidade: "error",
+      mensagem: error?.message ?? String(error),
+      stack_trace: error?.stack?.slice(0, 5000) ?? null,
+      modulo: "unhandledrejection",
+      url_requisicao: window.location.href,
+      user_agent: navigator.userAgent,
+    };
+    navigator.sendBeacon?.(
+      "/api/log-erro",
+      new Blob([JSON.stringify(payload)], { type: "application/json" }),
+    );
+  } catch {
+    // best-effort
+  }
+};
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ErrorBoundary>

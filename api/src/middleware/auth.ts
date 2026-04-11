@@ -13,6 +13,8 @@ export interface UsuarioRequest {
     permissoes: Record<string, boolean> | null;
     secretaria_id: string;
     municipio_id: string;
+    nivel_govbr: string | null;
+    is_superadmin: boolean;
   } | null;
 }
 
@@ -38,12 +40,14 @@ export async function verificarAuth(
 
     const { rows } = await getPool().query(
       `SELECT s.id, s.nome, s.perfil_id, p.nome AS perfil_nome, p.permissoes,
-              s.secretaria_id, sec.municipio_id
+              s.secretaria_id, sec.municipio_id, u.nivel_govbr, s.is_superadmin
        FROM servidores s
        JOIN perfis p ON s.perfil_id = p.id
        JOIN secretarias sec ON s.secretaria_id = sec.id
-       WHERE s.user_id = (SELECT id FROM usuarios WHERE firebase_uid = $1)
+       JOIN usuarios u ON s.user_id = u.id
+       WHERE u.firebase_uid = $1
          AND s.deletado_em IS NULL
+       ORDER BY s.criado_em DESC
        LIMIT 1`,
       [decoded.uid],
     );
@@ -53,6 +57,13 @@ export async function verificarAuth(
       email: decoded.email ?? "",
       servidor: rows[0] ?? null,
     };
+
+    // SuperAdmin não tem RLS — vê tudo
+    if (rows[0]?.is_superadmin) {
+      await getPool().query(`SELECT set_config('app.current_municipio_id', '', false)`);
+    } else if (rows[0]?.municipio_id) {
+      await getPool().query(`SELECT set_config('app.current_municipio_id', $1, false)`, [rows[0].municipio_id]);
+    }
   } catch {
     reply.status(401).send({ error: "Token inválido" });
   }
@@ -71,12 +82,14 @@ export async function authOpcional(
     const decoded = await getAuth().verifyIdToken(token);
     const { rows } = await getPool().query(
       `SELECT s.id, s.nome, s.perfil_id, p.nome AS perfil_nome, p.permissoes,
-              s.secretaria_id, sec.municipio_id
+              s.secretaria_id, sec.municipio_id, u.nivel_govbr, s.is_superadmin
        FROM servidores s
        JOIN perfis p ON s.perfil_id = p.id
        JOIN secretarias sec ON s.secretaria_id = sec.id
-       WHERE s.user_id = (SELECT id FROM usuarios WHERE firebase_uid = $1)
+       JOIN usuarios u ON s.user_id = u.id
+       WHERE u.firebase_uid = $1
          AND s.deletado_em IS NULL
+       ORDER BY s.criado_em DESC
        LIMIT 1`,
       [decoded.uid],
     );
@@ -85,6 +98,12 @@ export async function authOpcional(
       email: decoded.email ?? "",
       servidor: rows[0] ?? null,
     };
+
+    if (rows[0]?.is_superadmin) {
+      await getPool().query(`SELECT set_config('app.current_municipio_id', '', false)`);
+    } else if (rows[0]?.municipio_id) {
+      await getPool().query(`SELECT set_config('app.current_municipio_id', $1, false)`, [rows[0].municipio_id]);
+    }
   } catch {
     // ignora — auth é opcional
   }

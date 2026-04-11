@@ -46,14 +46,26 @@ export class ErrorBoundary extends Component<Props, State> {
       return;
     }
 
-    // Registrar no audit log via API (fire-and-forget)
+    // Enviar erro rico para o sistema de monitoramento
     try {
+      const stackLines = error.stack?.split("\n") ?? [];
+      const callerLine = stackLines[1] ?? "";
+      const fileMatch = callerLine.match(/(?:at\s+)?(.+?):(\d+):(\d+)/);
+
       const payload = {
+        origem: "frontend",
+        severidade: "error",
         mensagem: error.message,
-        stack: error.stack?.slice(0, 2000),
-        componentStack: info.componentStack?.slice(0, 2000),
-        url: window.location.href,
-        timestamp: new Date().toISOString(),
+        stack_trace: error.stack?.slice(0, 5000),
+        arquivo: fileMatch?.[1] ?? null,
+        linha: fileMatch?.[2] ? parseInt(fileMatch[2]) : null,
+        coluna: fileMatch?.[3] ? parseInt(fileMatch[3]) : null,
+        modulo: "error-boundary",
+        url_requisicao: window.location.href,
+        user_agent: navigator.userAgent,
+        metadata: {
+          componentStack: info.componentStack?.slice(0, 2000),
+        },
       };
       navigator.sendBeacon?.(
         "/api/log-erro",

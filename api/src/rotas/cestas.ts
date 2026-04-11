@@ -3,14 +3,36 @@ import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
 import { tratarErro } from "../utils/erros.js";
+import { notificarCestaAprovada } from "../utils/push.js";
 import { parsePaginacao, respostaPaginada } from "../utils/paginacao.js";
+import {
+  validarBody, validarParams, idParamsSchema,
+  criarCestaSchema, atualizarCestaSchema, duplicarCestaSchema, versaoCestaSchema,
+} from "../middleware/validacao.js";
 
 export async function rotasCestas(app: FastifyInstance) {
   app.addHook("preHandler", verificarAuth);
   app.addHook("preHandler", exigirServidor);
 
   // GET /api/cestas
-  app.get("/api/cestas", async (req, reply) => {
+  app.get("/api/cestas", {
+    schema: {
+      tags: ["Cestas"],
+      summary: "Listar cestas de preços",
+      description: "Retorna cestas do município com filtros por status, secretaria e busca textual.",
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: "object",
+        properties: {
+          busca: { type: "string" },
+          status: { type: "string", enum: ["rascunho", "em_andamento", "concluida", "cancelada"] },
+          secretaria_id: { type: "string", format: "uuid" },
+          pagina: { type: "integer", minimum: 1 },
+          por_pagina: { type: "integer", minimum: 1, maximum: 100 },
+        },
+      },
+    },
+  }, async (req, reply) => {
     try {
       const q = req.query as Record<string, string>;
       const pag = parsePaginacao(q);
@@ -71,13 +93,21 @@ export async function rotasCestas(app: FastifyInstance) {
   });
 
   // POST /api/cestas
-  app.post("/api/cestas", async (req, reply) => {
+  app.post("/api/cestas", { preHandler: validarBody(criarCestaSchema) }, async (req, reply) => {
     try {
       const b = req.body as {
         descricao_objeto: string; data: string; tipo_calculo: string;
         tipo_correcao: string; percentual_alerta?: number;
         secretaria_id: string; criado_por: string;
       };
+
+      // Validar que secretaria_id pertence ao município do usuário (prevenir cross-tenant)
+      const { rows: secCheck } = await getPool().query(
+        `SELECT 1 FROM secretarias WHERE id = $1 AND municipio_id = $2`,
+        [b.secretaria_id, req.usuario!.servidor!.municipio_id],
+      );
+      if (!secCheck[0]) return reply.status(403).send({ error: "Secretaria não pertence ao seu município" });
+
       const { rows } = await getPool().query(
         `INSERT INTO cestas (descricao_objeto, data, tipo_calculo, tipo_correcao, percentual_alerta, secretaria_id, criado_por)
          VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
@@ -88,7 +118,7 @@ export async function rotasCestas(app: FastifyInstance) {
   });
 
   // PUT /api/cestas/:id
-  app.put("/api/cestas/:id", async (req, reply) => {
+  app.put("/api/cestas/:id", { preHandler: [validarParams(idParamsSchema), validarBody(atualizarCestaSchema)] }, async (req, reply) => {
     try {
       const { id } = req.params as { id: string };
       const body = req.body as Record<string, unknown>;
@@ -105,6 +135,19 @@ export async function rotasCestas(app: FastifyInstance) {
         `UPDATE cestas SET ${sets.join(", ")} WHERE id = $${params.length} RETURNING *`, params,
       );
       if (!rows[0]) return reply.status(404).send({ error: "Cesta não encontrada" });
+
+      // Push notification quando cesta é concluída (Fase 13.4)
+      if (body.status === "concluida") {
+        const { rows: [mun] } = await getPool().query(
+          `SELECT s.municipio_id FROM secretarias s WHERE s.id = $1`, [rows[0].secretaria_id],
+        );
+        if (mun) {
+          notificarCestaAprovada(
+            mun.municipio_id, rows[0].descricao_objeto ?? "Cesta de preços", rows[0].id,
+          ).catch(() => { /* fire-and-forget */ });
+        }
+      }
+
       reply.send({ data: rows[0] });
     } catch (e) { tratarErro(e, reply); }
   });
@@ -119,14 +162,19 @@ export async function rotasCestas(app: FastifyInstance) {
   });
 
   // POST /api/cestas/:id/duplicar
-  app.post("/api/cestas/:id/duplicar", async (req, reply) => {
+  app.post("/api/cestas/:id/duplicar", { preHandler: [validarParams(idParamsSchema), validarBody(duplicarCestaSchema)] }, async (req, reply) => {
     try {
       const { id } = req.params as { id: string };
       const { servidor_id, com_fontes } = req.body as { servidor_id: string; com_fontes?: boolean };
       const pool = getPool();
 
-      // Copiar cesta
-      const { rows: [original] } = await pool.query(`SELECT * FROM cestas WHERE id = $1`, [id]);
+      // Validar que a cesta original pertence ao município do usuário
+      const { rows: [original] } = await pool.query(
+        `SELECT c.* FROM cestas c
+         JOIN secretarias sec ON c.secretaria_id = sec.id
+         WHERE c.id = $1 AND sec.municipio_id = $2`,
+        [id, req.usuario!.servidor!.municipio_id],
+      );
       if (!original) return reply.status(404).send({ error: "Cesta não encontrada" });
 
       const { rows: [nova] } = await pool.query(
@@ -173,7 +221,7 @@ export async function rotasCestas(app: FastifyInstance) {
   });
 
   // POST /api/cestas/:id/versoes
-  app.post("/api/cestas/:id/versoes", async (req, reply) => {
+  app.post("/api/cestas/:id/versoes", { preHandler: [validarParams(idParamsSchema), validarBody(versaoCestaSchema)] }, async (req, reply) => {
     try {
       const { id } = req.params as { id: string };
       const { servidor_id, descricao } = req.body as { servidor_id: string; descricao?: string };

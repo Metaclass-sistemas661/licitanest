@@ -27,6 +27,8 @@ export interface Servidor {
   criado_em: string;
   atualizado_em: string;
   deletado_em: string | null;
+  is_superadmin: boolean;
+  data_nascimento: string | null;
   // joins
   perfil?: Perfil;
   secretaria?: Secretaria;
@@ -50,6 +52,17 @@ export interface Municipio {
   nome: string;
   uf: string;
   codigo_ibge: string | null;
+  cnpj: string | null;
+  endereco: string | null;
+  cep: string | null;
+  telefone: string | null;
+  email: string | null;
+  brasao_url: string | null;
+  responsavel_nome: string | null;
+  responsavel_cpf: string | null;
+  responsavel_cargo: string | null;
+  responsavel_email: string | null;
+  observacoes: string | null;
   ativo: boolean;
   criado_em: string;
   atualizado_em: string;
@@ -515,6 +528,367 @@ export interface DadosFonteCMED {
   criado_em: string;
 }
 
+// ---- Dados Fonte ComprasNet (Compras Federais) ----
+export interface DadosFonteComprasNet {
+  id: string;
+  orgao: string;
+  uasg: string | null;
+  descricao_item: string;
+  unidade: string | null;
+  quantidade: number | null;
+  valor_unitario: number;
+  valor_total: number | null;
+  modalidade: string | null;
+  numero_contrato: string | null;
+  numero_ata: string | null;
+  data_publicacao: string | null;
+  uf: string | null;
+  tipo_registro: "contrato" | "ata" | "material";
+  criado_em: string;
+}
+
+// ---- Dados Fonte CATMAT/CATSER ----
+export interface DadosFonteCATMAT {
+  id: string;
+  codigo_catmat: string;
+  descricao: string;
+  grupo: string | null;
+  classe: string | null;
+  pdm: string | null;
+  status: string | null;
+  sustentavel: boolean;
+  tipo_registro: "material" | "servico";
+  criado_em: string;
+}
+
+// ---- Dados Fonte ARP (Atas Registro Preço Vigentes) ----
+export interface DadosFonteARP {
+  id: string;
+  orgao: string;
+  numero_ata: string | null;
+  numero_licitacao: string | null;
+  descricao_item: string;
+  marca: string | null;
+  unidade: string | null;
+  quantidade: number | null;
+  valor_unitario: number;
+  fornecedor: string | null;
+  cnpj_fornecedor: string | null;
+  data_vigencia_inicio: string;
+  data_vigencia_fim: string;
+  uf: string | null;
+  vigente: boolean;
+  criado_em: string;
+}
+
+// ---- Dados Fonte ANP (Combustíveis) ----
+export interface DadosFonteANP {
+  id: string;
+  produto: string;
+  bandeira: string | null;
+  valor_revenda: number;
+  valor_distribuicao: number | null;
+  municipio: string | null;
+  uf: string;
+  data_coleta: string;
+  nome_posto: string | null;
+  cnpj_posto: string | null;
+  criado_em: string;
+}
+
+// ---- Dados Fonte FNDE/PNAE (Merenda Escolar) ----
+export interface DadosFonteFNDE {
+  id: string;
+  descricao_item: string;
+  unidade: string | null;
+  valor_referencia: number;
+  regiao: string | null;
+  uf: string | null;
+  tipo_agricultura: "familiar" | "convencional";
+  programa: "PNAE" | "PNAC";
+  vigencia: string | null;
+  criado_em: string;
+}
+
+// ---- Filtros Fase 7 ----
+export interface FiltroComprasNet {
+  termo?: string;
+  uasg?: string;
+  uf?: string;
+  modalidade?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  tipoRegistro?: "contrato" | "ata" | "material";
+  limite?: number;
+}
+
+export interface FiltroCATMAT {
+  termo?: string;
+  codigo?: string;
+  grupo?: string;
+  classe?: string;
+  sustentavel?: boolean;
+  tipoRegistro?: "material" | "servico";
+  limite?: number;
+}
+
+export interface FiltroARP {
+  termo?: string;
+  uf?: string;
+  apenasVigentes?: boolean;
+  fornecedor?: string;
+  limite?: number;
+}
+
+export interface FiltroANP {
+  produto?: string;
+  municipio?: string;
+  uf?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  limite?: number;
+}
+
+export interface FiltroFNDE {
+  termo?: string;
+  uf?: string;
+  regiao?: string;
+  tipoAgricultura?: "familiar" | "convencional";
+  programa?: "PNAE" | "PNAC";
+  limite?: number;
+}
+
+// ── Fase 7 — P1 ──────────────────────────────────────
+
+export interface DadosFonteBPSSaude {
+  id: string;
+  codigo_br_saude: string | null;
+  descricao: string;
+  tipo_item: "equipamento" | "epi" | "instrumental" | "mobiliario" | "outro";
+  fabricante: string | null;
+  modelo: string | null;
+  unidade: string | null;
+  preco_unitario: number;
+  quantidade: number | null;
+  orgao_comprador: string | null;
+  uf: string | null;
+  data_compra: string | null;
+  criado_em: string;
+}
+
+export interface FiltroBPSSaude {
+  termo?: string;
+  tipoItem?: string;
+  uf?: string;
+  limite?: number;
+}
+
+export interface DadosFonteSIGTAP {
+  id: string;
+  codigo_procedimento: string;
+  nome_procedimento: string;
+  grupo: string | null;
+  subgrupo: string | null;
+  forma_organizacao: string | null;
+  complexidade: "baixa" | "media" | "alta" | null;
+  valor_ambulatorial: number | null;
+  valor_hospitalar: number | null;
+  competencia: string | null;
+  criado_em: string;
+}
+
+export interface FiltroSIGTAP {
+  termo?: string;
+  codigo?: string;
+  complexidade?: string;
+  limite?: number;
+}
+
+export interface DadosFonteCEASANacional {
+  id: string;
+  produto: string;
+  variedade: string | null;
+  unidade: string | null;
+  preco_minimo: number | null;
+  preco_maximo: number | null;
+  preco_comum: number | null;
+  ceasa_origem: string;
+  uf: string;
+  data_cotacao: string;
+  criado_em: string;
+}
+
+export interface FiltroCEASANacional {
+  termo?: string;
+  uf?: string;
+  ceasaOrigem?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  limite?: number;
+}
+
+export interface DadosFonteFIPE {
+  id: string;
+  codigo_fipe: string;
+  tipo_veiculo: "carro" | "moto" | "caminhao";
+  marca: string;
+  modelo: string;
+  ano_modelo: string | null;
+  combustivel: string | null;
+  valor: number;
+  mes_referencia: string | null;
+  criado_em: string;
+}
+
+export interface FiltroFIPE {
+  termo?: string;
+  tipoVeiculo?: string;
+  marca?: string;
+  limite?: number;
+}
+
+export interface DadosFonteSIASG {
+  id: string;
+  codigo_item: string | null;
+  descricao: string;
+  unidade: string | null;
+  preco_medio: number | null;
+  preco_minimo: number | null;
+  preco_maximo: number | null;
+  desvio_padrao: number | null;
+  quantidade_compras: number | null;
+  quantidade_orgaos: number | null;
+  periodo_inicio: string | null;
+  periodo_fim: string | null;
+  criado_em: string;
+}
+
+export interface FiltroSIASG {
+  termo?: string;
+  codigoItem?: string;
+  limite?: number;
+}
+
+export interface DadosFonteTCU {
+  id: string;
+  descricao: string;
+  unidade: string | null;
+  mediana: number | null;
+  quartil_1: number | null;
+  quartil_3: number | null;
+  preco_minimo: number | null;
+  preco_maximo: number | null;
+  quantidade_amostras: number | null;
+  metodologia: string | null;
+  periodo_referencia: string | null;
+  criado_em: string;
+}
+
+export interface FiltroTCU {
+  termo?: string;
+  limite?: number;
+}
+
+// ── Fase 7 — P2 + P3 ──────────────────────────────────
+
+export interface DadosFonteCUB {
+  id: string;
+  uf: string;
+  padrao_construtivo: string;
+  tipo_custo: "material" | "mao_de_obra" | "total" | "despesas_administrativas";
+  valor_m2: number;
+  mes_referencia: string;
+  criado_em: string;
+}
+
+export interface FiltroCUB {
+  uf?: string;
+  padraoConstrutivo?: string;
+  mesReferencia?: string;
+  limite?: number;
+}
+
+export interface DadosFonteBNDES {
+  id: string;
+  codigo_produto: string | null;
+  descricao: string;
+  categoria: string | null;
+  fabricante: string | null;
+  fornecedor: string | null;
+  preco: number;
+  condicao_pagamento: string | null;
+  data_catalogo: string | null;
+  criado_em: string;
+}
+
+export interface FiltroBNDES {
+  termo?: string;
+  categoria?: string;
+  limite?: number;
+}
+
+export interface DadosFonteSIASIH {
+  id: string;
+  codigo_procedimento: string;
+  nome_procedimento: string;
+  tipo_registro: "SIA" | "SIH";
+  complexidade: "baixa" | "media" | "alta" | null;
+  valor_unitario: number | null;
+  valor_medio: number | null;
+  quantidade_aprovada: number | null;
+  competencia: string | null;
+  uf: string | null;
+  criado_em: string;
+}
+
+export interface FiltroSIASIH {
+  termo?: string;
+  tipoRegistro?: "SIA" | "SIH";
+  uf?: string;
+  complexidade?: string;
+  limite?: number;
+}
+
+export interface DadosFonteAgenciasReg {
+  id: string;
+  agencia: "ANEEL" | "ANATEL" | "ANTT" | "ANTAQ";
+  descricao: string;
+  tipo_tarifa: string | null;
+  valor: number;
+  unidade: string | null;
+  distribuidora_operadora: string | null;
+  uf: string | null;
+  vigencia_inicio: string | null;
+  vigencia_fim: string | null;
+  criado_em: string;
+}
+
+export interface FiltroAgenciasReg {
+  agencia?: string;
+  termo?: string;
+  uf?: string;
+  limite?: number;
+}
+
+export interface DadosFonteINCRA {
+  id: string;
+  tipo_terra: "lavoura" | "pastagem" | "cerrado" | "mata" | "campo" | "misto";
+  regiao: string | null;
+  municipio_referencia: string | null;
+  uf: string;
+  valor_hectare: number;
+  semestre_referencia: string | null;
+  fonte_dados: "INCRA" | "FNP" | "EMBRAPA";
+  criado_em: string;
+}
+
+export interface FiltroINCRA {
+  tipoTerra?: string;
+  uf?: string;
+  regiao?: string;
+  limite?: number;
+}
+
 // ---- Filtro estendido para novas fontes ----
 export interface FiltroBPS {
   codigoBR?: string;
@@ -856,6 +1230,7 @@ export interface DadosPortalFornecedor {
   respostas_existentes: RespostaCotacao[];
   cesta_descricao: string;
   entidade_solicitante: string;
+  csrf_token?: string;
 }
 
 // ====================================================================
@@ -1163,73 +1538,157 @@ export interface ItemOCR {
 }
 
 // ============================================================================
-// FASE 14 — MULTI-TENANCY, BILLING E ESCALABILIDADE
+// FASE 14 — MULTI-TENANCY E ESCALABILIDADE
 // ============================================================================
 
-// ---- Planos e Assinaturas ----
-export type NomePlano = "gratuito" | "basico" | "profissional" | "enterprise";
-export type StatusAssinatura = "ativa" | "trial" | "cancelada" | "inadimplente" | "expirada";
-export type IntervaloCobranca = "mensal" | "anual";
-
-export interface Plano {
-  id: string;
-  nome: NomePlano;
-  titulo: string;
-  descricao: string;
-  preco_mensal: number;       // centavos (R$)
-  preco_anual: number;        // centavos (R$)
-  limite_usuarios: number;
-  limite_cestas: number;
-  limite_cotacoes_mes: number;
-  funcionalidades: string[];   // lista de features habilitadas
-  ativo: boolean;
-  stripe_price_id_mensal: string | null;
-  stripe_price_id_anual: string | null;
-  criado_em: string;
-}
-
-export interface Assinatura {
-  id: string;
-  municipio_id: string;
-  plano_id: string;
-  status: StatusAssinatura;
-  intervalo: IntervaloCobranca;
-  inicio: string;
-  fim: string | null;
-  trial_fim: string | null;
-  stripe_subscription_id: string | null;
-  stripe_customer_id: string | null;
-  valor_corrente: number;     // centavos
-  criado_em: string;
-  atualizado_em: string;
-  cancelado_em: string | null;
-  // joins
-  plano?: Plano;
-  municipio?: Municipio;
-}
-
-// ---- Faturas ----
-export type StatusFatura = "pendente" | "paga" | "vencida" | "cancelada";
+// ---- Faturas (Contratos) ----
+export type StatusFatura = "pendente" | "paga" | "vencida" | "cancelada" | "estornada";
 
 export interface Fatura {
   id: string;
-  assinatura_id: string;
   municipio_id: string;
   numero: string;
   valor: number;             // centavos
   status: StatusFatura;
   vencimento: string;
   pago_em: string | null;
-  stripe_invoice_id: string | null;
+  asaas_payment_id: string | null;
+  asaas_status: string | null;
   url_boleto: string | null;
   url_nf: string | null;
+  url_pagamento: string | null;
   criado_em: string;
+  contrato_id: string | null;
+  parcela: number | null;
+  comprovante_url: string | null;
+  observacoes: string | null;
+  atualizado_em: string | null;
   // joins
-  assinatura?: Assinatura;
+  municipio_nome?: string;
+  municipio_uf?: string;
+  numero_contrato?: string;
+}
+
+// ---- Contratos Governamentais ----
+export type StatusContrato =
+  | "rascunho"
+  | "pendente_assinatura"
+  | "ativo"
+  | "suspenso"
+  | "encerrado"
+  | "cancelado"
+  | "renovacao";
+
+export type StatusAssinaturaDigitalContrato = "pendente" | "assinado" | "recusado" | "expirado";
+
+export type TipoAditivo = "valor" | "prazo" | "objeto" | "misto";
+
+export type TipoNotificacaoContrato =
+  | "novo_contrato"
+  | "aditivo"
+  | "vencimento_proximo"
+  | "documento_assinado";
+
+export interface Contrato {
+  id: string;
+  municipio_id: string;
+  numero_contrato: string;
+  objeto: string;
+  valor_total: number;
+  valor_mensal: number | null;
+  quantidade_parcelas: number;
+  data_inicio: string;
+  data_fim: string;
+  data_assinatura: string | null;
+  limite_usuarios: number;
+  limite_cestas: number;
+  limite_cotacoes_mes: number;
+  status: StatusContrato;
+  pdf_url: string | null;
+  pdf_nome_arquivo: string | null;
+  pdf_tamanho_bytes: number | null;
+  pdf_hash_sha256: string | null;
+  conteudo_html: string | null;
+  conteudo_json: Record<string, unknown> | null;
+  assinatura_digital_status: StatusAssinaturaDigitalContrato;
+  assinatura_digital_certificado: Record<string, unknown> | null;
+  assinatura_digital_hash: string | null;
+  assinatura_digital_em: string | null;
+  assinatura_digital_por: string | null;
+  responsavel_nome: string | null;
+  responsavel_cargo: string | null;
+  responsavel_cpf: string | null;
+  numero_processo: string | null;
+  modalidade: string | null;
+  observacoes: string | null;
+  criado_por: string | null;
+  atualizado_por: string | null;
+  criado_em: string;
+  atualizado_em: string;
+  deletado_em: string | null;
+  // joins
+  municipio_nome?: string;
+  municipio_uf?: string;
+  municipio_codigo_ibge?: string;
+  criado_por_nome?: string;
+  aditivos?: ContratoAditivo[];
+}
+
+export interface ContratoAditivo {
+  id: string;
+  contrato_id: string;
+  numero_aditivo: string;
+  tipo: TipoAditivo;
+  descricao: string;
+  valor_acrescimo: number;
+  nova_data_fim: string | null;
+  novos_limites: Record<string, unknown> | null;
+  pdf_url: string | null;
+  pdf_nome_arquivo: string | null;
+  data_assinatura: string | null;
+  criado_por: string | null;
+  criado_em: string;
+}
+
+export interface ContratoHistorico {
+  id: string;
+  contrato_id: string;
+  acao: string;
+  campo_alterado: string | null;
+  valor_anterior: string | null;
+  valor_novo: string | null;
+  usuario_id: string | null;
+  usuario_nome?: string;
+  ip_address: string | null;
+  criado_em: string;
+}
+
+export interface ContratoNotificacao {
+  id: string;
+  contrato_id: string;
+  municipio_id: string;
+  servidor_id: string;
+  tipo: TipoNotificacaoContrato;
+  titulo: string;
+  mensagem: string | null;
+  lido: boolean;
+  lido_em: string | null;
+  criado_em: string;
+}
+
+export interface ContratoDashboardResumo {
+  contratos_ativos: number;
+  pendentes_assinatura: number;
+  encerrados: number;
+  em_renovacao: number;
+  valor_total_ativos: number;
+  mrr: number;
+  municipios_ativos: number;
+  vencendo_30_dias: number;
 }
 
 // ---- Onboarding ----
-export type EtapaOnboarding = "dados_municipio" | "dados_responsavel" | "escolha_plano" | "confirmacao";
+export type EtapaOnboarding = "dados_municipio" | "dados_responsavel" | "confirmacao";
 
 export interface DadosOnboarding {
   // Etapa 1
@@ -1243,10 +1702,6 @@ export interface DadosOnboarding {
   responsavel_cargo: string;
   responsavel_telefone?: string;
   responsavel_senha?: string;
-  // Etapa 3
-  plano_escolhido?: NomePlano;
-  plano_selecionado?: NomePlano;
-  intervalo?: IntervaloCobranca;
 }
 
 // ---- Métricas de Uso ----
@@ -1262,8 +1717,6 @@ export interface MetricasUsoMunicipio {
   cestas_ultimo_mes: number;
   cotacoes_ultimo_mes: number;
   ultimo_acesso: string | null;
-  plano_atual?: NomePlano | null;
-  status_assinatura?: StatusAssinatura | null;
   armazenamento_mb: number;
   atualizado_em: string;
 }
@@ -1271,7 +1724,6 @@ export interface MetricasUsoMunicipio {
 // ---- Painel Admin Metaclass ----
 export interface TenantResumo {
   municipio: Municipio;
-  assinatura: Assinatura | null;
   metricas: MetricasUsoMunicipio | null;
 }
 
@@ -1281,10 +1733,6 @@ export interface EstatisticasPlataforma {
   total_usuarios?: number;
   total_cestas?: number;
   total_cotacoes?: number;
-  mrr: number;                // Monthly Recurring Revenue em centavos
-  arr: number;                // Annual RR em centavos
-  churn_rate: number;         // %
-  planos_distribuicao: Record<string, number>;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1352,6 +1800,48 @@ export interface CriarAssinaturaDTO {
   cpf_cnpj_assinante?: string;
   email_assinante?: string;
   dados_assinados?: Record<string, unknown>;
+}
+
+// ---- Assinatura Digital ICP-Brasil ----
+export type TipoAssinatura = "simples" | "icp-brasil";
+export type TipoCertificado = "A1" | "A3";
+
+export interface CertificadoDigital {
+  subject: string;
+  issuer: string;
+  serial_number: string;
+  not_before: string;
+  not_after: string;
+  cpf_cnpj: string;
+  tipo: TipoCertificado;
+  thumbprint: string;
+}
+
+export interface AssinaturaDigitalICP {
+  id: string;
+  referencia_tipo: string;
+  referencia_id: string;
+  tipo_assinatura: TipoAssinatura;
+  certificado?: CertificadoDigital | null;
+  hash_documento: string;
+  assinatura_pkcs7?: string | null;
+  cadeia_certificacao?: string | null;
+  nome_assinante: string;
+  cpf_cnpj_assinante: string;
+  validado: boolean;
+  validado_em?: string | null;
+  assinado_em: string;
+  criado_em: string;
+}
+
+export interface VerificacaoAssinatura {
+  valida: boolean;
+  certificado_valido: boolean;
+  cadeia_confiavel: boolean;
+  nao_revogado: boolean;
+  dentro_validade: boolean;
+  hash_confere: boolean;
+  detalhes?: string;
 }
 
 // ---- API REST Pública ----
@@ -1676,4 +2166,103 @@ export interface MemorialItemCalculo {
     metodo_adotado: MetodologiaCalculo;
   };
   valor_total_estimado: number;
+}
+
+// ---- Monitoramento (Fase 3 — SuperAdmin) ----
+export type OrigemErro = "frontend" | "api" | "cloud_function" | "cron" | "webhook";
+export type SeveridadeErro = "critical" | "error" | "warning" | "info";
+
+export interface ErroSistema {
+  id: string;
+  origem: OrigemErro;
+  severidade: SeveridadeErro;
+  mensagem: string;
+  stack_trace: string | null;
+  arquivo: string | null;
+  linha: number | null;
+  coluna: number | null;
+  funcao: string | null;
+  modulo: string | null;
+  url_requisicao: string | null;
+  metodo_http: string | null;
+  status_http: number | null;
+  usuario_id: string | null;
+  municipio_id: string | null;
+  user_agent: string | null;
+  ip_address: string | null;
+  browser: string | null;
+  os: string | null;
+  fingerprint: string | null;
+  ocorrencias: number;
+  primeira_ocorrencia: string;
+  ultima_ocorrencia: string;
+  resolvido: boolean;
+  resolvido_por: string | null;
+  resolvido_em: string | null;
+  notas_resolucao: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export type StatusHealthCheck = "healthy" | "degraded" | "down";
+
+export interface HealthCheck {
+  id: number;
+  servico: string;
+  status: StatusHealthCheck;
+  latencia_ms: number | null;
+  detalhes: Record<string, unknown> | null;
+  verificado_em: string;
+}
+
+export interface MetricaSistema {
+  id: number;
+  timestamp: string;
+  tipo: string;
+  valor: number;
+  unidade: string | null;
+  labels: Record<string, unknown>;
+  created_at: string;
+}
+
+export type StatusTeste = "pass" | "fail" | "skip" | "error";
+
+export interface ResultadoTeste {
+  id: string;
+  suite: string;
+  teste: string;
+  status: StatusTeste;
+  duracao_ms: number | null;
+  mensagem_erro: string | null;
+  stack_trace: string | null;
+  executado_por: string | null;
+  executado_em: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface AlertaMonitoramento {
+  id: string;
+  regra_id: string | null;
+  severidade: string;
+  titulo: string;
+  descricao: string | null;
+  lido: boolean;
+  lido_em: string | null;
+  referencia_tipo: string | null;
+  referencia_id: string | null;
+  created_at: string;
+}
+
+export interface ResumoSaude {
+  servicos: HealthCheck[];
+  status_geral: StatusHealthCheck;
+  ultima_verificacao: string;
+}
+
+export interface ResumoErros {
+  total: number;
+  nao_resolvidos: number;
+  criticos: number;
+  por_origem: Record<OrigemErro, number>;
+  ultimas_24h: number;
 }

@@ -22,6 +22,28 @@ import {
   useBuscaCEASA,
   useBuscaCMED,
 } from "./useFontesPrecoFase6";
+import {
+  useBuscaComprasNet,
+  useBuscaCATMAT,
+  useBuscaARP,
+  useBuscaANP,
+  useBuscaFNDE,
+} from "./useFontesPrecoFase7";
+import {
+  useBuscaBPSSaude,
+  useBuscaSIGTAP,
+  useBuscaCEASANacional,
+  useBuscaFIPE,
+  useBuscaSIASG,
+  useBuscaTCUPrecos,
+} from "./useFontesPrecoFase7P1";
+import {
+  useBuscaCUB,
+  useBuscaBNDES,
+  useBuscaSIASIH,
+  useBuscaAgenciasReg,
+  useBuscaINCRA,
+} from "./useFontesPrecoFase7P2";
 
 // ── Estado genérico de busca ────────────────────────
 interface EstadoBusca<T> {
@@ -192,6 +214,24 @@ export function useBuscaTodasFontes() {
   const conab = useBuscaCONAB();
   const ceasa = useBuscaCEASA();
   const cmed = useBuscaCMED();
+  const comprasnet = useBuscaComprasNet();
+  const catmat = useBuscaCATMAT();
+  const arp = useBuscaARP();
+  const anp = useBuscaANP();
+  const fnde = useBuscaFNDE();
+  // Fase 7 — P1
+  const bpsSaude = useBuscaBPSSaude();
+  const sigtap = useBuscaSIGTAP();
+  const ceasaNacional = useBuscaCEASANacional();
+  const fipe = useBuscaFIPE();
+  const siasg = useBuscaSIASG();
+  const tcuPrecos = useBuscaTCUPrecos();
+  // Fase 7 — P2+P3
+  const cub = useBuscaCUB();
+  const bndes = useBuscaBNDES();
+  const siaSih = useBuscaSIASIH();
+  const agenciasReg = useBuscaAgenciasReg();
+  const incra = useBuscaINCRA();
 
   const buscarTodas = useCallback(
     async (filtro: FiltroFonte, ufs?: UF[]) => {
@@ -204,6 +244,22 @@ export function useBuscaTodasFontes() {
         conab.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
         ceasa.buscar({ termo: filtro.termo, limite: filtro.limite }),
         cmed.buscar({ termo: filtro.termo, limite: filtro.limite }),
+        // Fontes Fase 7 — P0
+        comprasnet.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
+        arp.buscar({ termo: filtro.termo, uf: filtro.uf, apenasVigentes: true, limite: filtro.limite }),
+        anp.buscar({ produto: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
+        fnde.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
+        // Fontes Fase 7 — P1
+        bpsSaude.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
+        sigtap.buscar({ termo: filtro.termo, limite: filtro.limite }),
+        ceasaNacional.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
+        fipe.buscar({ termo: filtro.termo, limite: filtro.limite }),
+        siasg.buscar({ termo: filtro.termo, limite: filtro.limite }),
+        tcuPrecos.buscar({ termo: filtro.termo, limite: filtro.limite }),
+        // Fontes Fase 7 — P2+P3
+        bndes.buscar({ termo: filtro.termo, limite: filtro.limite }),
+        siaSih.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
+        agenciasReg.buscar({ termo: filtro.termo, uf: filtro.uf, limite: filtro.limite }),
       ];
       if (ufs && ufs.length > 0) {
         buscas.push(multiTCE.buscar(filtro, ufs));
@@ -212,7 +268,10 @@ export function useBuscaTodasFontes() {
       }
       await Promise.allSettled(buscas);
     },
-    [pncp, painel, tce, multiTCE, bps, sinapi, conab, ceasa, cmed]
+    [pncp, painel, tce, multiTCE, bps, sinapi, conab, ceasa, cmed,
+     comprasnet, arp, anp, fnde,
+     bpsSaude, sigtap, ceasaNacional, fipe, siasg, tcuPrecos,
+     bndes, siaSih, agenciasReg]
   );
 
   const limparTodas = useCallback(() => {
@@ -225,11 +284,34 @@ export function useBuscaTodasFontes() {
     conab.limpar();
     ceasa.limpar();
     cmed.limpar();
-  }, [pncp, painel, tce, multiTCE, bps, sinapi, conab, ceasa, cmed]);
+    comprasnet.limpar();
+    catmat.limpar();
+    arp.limpar();
+    anp.limpar();
+    fnde.limpar();
+    bpsSaude.limpar();
+    sigtap.limpar();
+    ceasaNacional.limpar();
+    fipe.limpar();
+    siasg.limpar();
+    tcuPrecos.limpar();
+    cub.limpar();
+    bndes.limpar();
+    siaSih.limpar();
+    agenciasReg.limpar();
+    incra.limpar();
+  }, [pncp, painel, tce, multiTCE, bps, sinapi, conab, ceasa, cmed,
+      comprasnet, catmat, arp, anp, fnde,
+      bpsSaude, sigtap, ceasaNacional, fipe, siasg, tcuPrecos,
+      cub, bndes, siaSih, agenciasReg, incra]);
 
   const carregando =
     pncp.carregando || painel.carregando || tce.carregando || multiTCE.carregando ||
-    bps.carregando || sinapi.carregando || conab.carregando || ceasa.carregando || cmed.carregando;
+    bps.carregando || sinapi.carregando || conab.carregando || ceasa.carregando || cmed.carregando ||
+    comprasnet.carregando || catmat.carregando || arp.carregando || anp.carregando || fnde.carregando ||
+    bpsSaude.carregando || sigtap.carregando || ceasaNacional.carregando || fipe.carregando ||
+    siasg.carregando || tcuPrecos.carregando ||
+    cub.carregando || bndes.carregando || siaSih.carregando || agenciasReg.carregando || incra.carregando;
   const totalResultados =
     pncp.dados.length +
     painel.dados.length +
@@ -239,7 +321,23 @@ export function useBuscaTodasFontes() {
     sinapi.dados.length +
     conab.dados.length +
     ceasa.dados.length +
-    cmed.dados.length;
+    cmed.dados.length +
+    comprasnet.dados.length +
+    catmat.dados.length +
+    arp.dados.length +
+    anp.dados.length +
+    fnde.dados.length +
+    bpsSaude.dados.length +
+    sigtap.dados.length +
+    ceasaNacional.dados.length +
+    fipe.dados.length +
+    siasg.dados.length +
+    tcuPrecos.dados.length +
+    cub.dados.length +
+    bndes.dados.length +
+    siaSih.dados.length +
+    agenciasReg.dados.length +
+    incra.dados.length;
 
   return {
     pncp,
@@ -251,6 +349,22 @@ export function useBuscaTodasFontes() {
     conab,
     ceasa,
     cmed,
+    comprasnet,
+    catmat,
+    arp,
+    anp,
+    fnde,
+    bpsSaude,
+    sigtap,
+    ceasaNacional,
+    fipe,
+    siasg,
+    tcuPrecos,
+    cub,
+    bndes,
+    siaSih,
+    agenciasReg,
+    incra,
     buscarTodas,
     limparTodas,
     carregando,

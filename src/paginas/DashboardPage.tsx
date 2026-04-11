@@ -16,9 +16,15 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Button } from "@/componentes/ui/button";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useAuth } from "@/hooks/useAuth";
+import { staggerContainer, staggerItem, transitionNormal } from "@/lib/animations";
+import { AnimatedCounter } from "@/componentes/ui/animated-counter";
+import { DashboardFilters, type DashboardFiltros } from "@/componentes/ui/dashboard-filters";
+import { ChartExportWrapper } from "@/componentes/ui/chart-export-wrapper";
+import { ContratoAtivoCard } from "@/componentes/contratos/ContratoAtivoCard";
 import type { Atividade, FonteUtilizacao, TipoAtividade } from "@/tipos";
 
 // ── Formatadores ─────────────────────────────────────
@@ -75,8 +81,22 @@ export function DashboardPage() {
         )}
       </div>
 
+      {/* ── Painel de Filtros ─────────────────────── */}
+      <DashboardFilters
+        secretarias={cestasSecretaria.map((cs) => cs.nome)}
+        onFiltrar={(_filtros: DashboardFiltros) => {
+          // TODO: integrate with useDashboard when backend supports filter params
+        }}
+      />
+
       {/* ── Cards de estatísticas ─────────────────── */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <motion.div
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div variants={staggerItem} transition={transitionNormal}>
         <StatCard
           label="Cestas Ativas"
           valor={String(m?.cestas_ativas ?? 0)}
@@ -85,6 +105,8 @@ export function DashboardPage() {
           cor="text-blue-600"
           onClick={() => navigate("/cestas")}
         />
+        </motion.div>
+        <motion.div variants={staggerItem} transition={transitionNormal}>
         <StatCard
           label="Itens no Catálogo"
           valor={String(m?.total_produtos_catalogo ?? 0)}
@@ -93,6 +115,8 @@ export function DashboardPage() {
           cor="text-emerald-600"
           onClick={() => navigate("/catalogo")}
         />
+        </motion.div>
+        <motion.div variants={staggerItem} transition={transitionNormal}>
         <StatCard
           label="Fornecedores"
           valor={String(m?.total_fornecedores ?? 0)}
@@ -101,6 +125,8 @@ export function DashboardPage() {
           cor="text-violet-600"
           onClick={() => navigate("/fornecedores")}
         />
+        </motion.div>
+        <motion.div variants={staggerItem} transition={transitionNormal}>
         <StatCard
           label="IPCA Acumulado (12m)"
           valor={ipca ? `${ipca.acumulado_12m.toFixed(2)}%` : "—"}
@@ -108,7 +134,8 @@ export function DashboardPage() {
           icon={TrendingUp}
           cor="text-amber-600"
         />
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* ── Segunda linha: Economia + Preços ──────── */}
       {economia && (
@@ -154,9 +181,21 @@ export function DashboardPage() {
         </div>
       )}
 
+      {/* ── Card de contrato ativo (município administrador) ── */}
+      <ContratoAtivoCard />
+
       {/* ── Fontes + Cestas por Secretaria + Atividade ── */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <motion.div
+        className="grid gap-4 lg:grid-cols-3"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
         {/* Fontes mais utilizadas */}
+        <ChartExportWrapper
+          nomeArquivo="fontes-precos"
+          dados={fontes.map((f) => ({ Fonte: f.nome, Sigla: f.sigla, "Total Preços": f.total_precos }))}
+        >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -179,8 +218,13 @@ export function DashboardPage() {
             )}
           </CardContent>
         </Card>
+        </ChartExportWrapper>
 
         {/* Cestas por secretaria (gráfico simplificado) */}
+        <ChartExportWrapper
+          nomeArquivo="cestas-secretaria"
+          dados={cestasSecretaria.map((cs) => ({ Secretaria: cs.nome, Total: cs.total }))}
+        >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -210,9 +254,11 @@ export function DashboardPage() {
                         {cs.nome}
                       </span>
                       <div className="flex-1 h-4 bg-muted/30 rounded overflow-hidden">
-                        <div
+                        <motion.div
                           className={`h-full rounded ${cores[i % cores.length]}`}
-                          style={{ width: `${largura}%` }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${largura}%` }}
+                          transition={{ duration: 0.8, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
                         />
                       </div>
                       <span className="w-8 text-right text-xs font-bold">
@@ -225,6 +271,7 @@ export function DashboardPage() {
             )}
           </CardContent>
         </Card>
+        </ChartExportWrapper>
 
         {/* Atividade recente */}
         <Card>
@@ -249,7 +296,7 @@ export function DashboardPage() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
 
       {/* ── Alertas / Preços excluídos ────────────── */}
       {m && m.total_precos_excluidos > 0 && (
@@ -291,6 +338,10 @@ function StatCard({
   cor: string;
   onClick?: () => void;
 }) {
+  const numericValue = parseFloat(valor.replace(/[^\d.,%-]/g, "").replace(",", "."));
+  const isPercent = valor.includes("%");
+  const isNumeric = !isNaN(numericValue) && isFinite(numericValue);
+
   return (
     <Card
       className={onClick ? "cursor-pointer hover:shadow-md transition-shadow" : ""}
@@ -301,7 +352,17 @@ function StatCard({
         <Icon className={`h-4 w-4 ${cor}`} />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{valor}</div>
+        <div className="text-2xl font-bold">
+          {isNumeric ? (
+            <AnimatedCounter
+              value={numericValue}
+              decimals={isPercent ? 2 : 0}
+              suffix={isPercent ? "%" : ""}
+            />
+          ) : (
+            valor
+          )}
+        </div>
         <p className="text-xs text-muted-foreground mt-1">{subtext}</p>
       </CardContent>
     </Card>
@@ -311,14 +372,16 @@ function StatCard({
 function FonteBar({ fonte, maxPrecos }: { fonte: FonteUtilizacao; maxPrecos: number }) {
   const largura = maxPrecos > 0 ? (fonte.total_precos / maxPrecos) * 100 : 0;
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 group">
       <span className="w-12 text-right text-xs font-mono text-muted-foreground truncate" title={fonte.nome}>
         {fonte.sigla}
       </span>
       <div className="flex-1 h-3.5 bg-muted/30 rounded overflow-hidden">
-        <div
-          className="h-full rounded bg-primary/70"
-          style={{ width: `${largura}%` }}
+        <motion.div
+          className="h-full rounded bg-gradient-to-r from-primary/60 to-primary"
+          initial={{ width: 0 }}
+          animate={{ width: `${largura}%` }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
         />
       </div>
       <span className="w-12 text-right text-xs font-medium">

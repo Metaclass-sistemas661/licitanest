@@ -25,16 +25,36 @@ export async function rotasImportacao(app: FastifyInstance) {
 
       let sucesso = 0;
       let erros = 0;
+      const naoEncontrados: { descricao: string; melhor_match?: string; score?: number }[] = [];
       for (const linha of linhas) {
         try {
-          // Buscar item por descrição
+          // Fuzzy match com pg_trgm (similarity >= 0.6)
           const { rows: itens } = await pool.query(
-            `SELECT ic.id FROM itens_cesta ic
+            `SELECT ic.id, pc.descricao, similarity(pc.descricao, $2) AS score
+             FROM itens_cesta ic
              JOIN produtos_catalogo pc ON ic.produto_id = pc.id
-             WHERE ic.cesta_id = $1 AND pc.descricao ILIKE $2 LIMIT 1`,
-            [cesta_id, `%${linha.item_descricao}%`],
+             WHERE ic.cesta_id = $1 AND similarity(pc.descricao, $2) >= 0.6
+             ORDER BY score DESC LIMIT 1`,
+            [cesta_id, linha.item_descricao],
           );
-          if (!itens[0]) { erros++; continue; }
+          if (!itens[0]) {
+            // Buscar melhor candidato abaixo do threshold para feedback
+            const { rows: candidatos } = await pool.query(
+              `SELECT pc.descricao, similarity(pc.descricao, $2) AS score
+               FROM itens_cesta ic
+               JOIN produtos_catalogo pc ON ic.produto_id = pc.id
+               WHERE ic.cesta_id = $1
+               ORDER BY score DESC LIMIT 1`,
+              [cesta_id, linha.item_descricao],
+            );
+            naoEncontrados.push({
+              descricao: linha.item_descricao,
+              melhor_match: candidatos[0]?.descricao,
+              score: candidatos[0]?.score ? Number(candidatos[0].score) : undefined,
+            });
+            erros++;
+            continue;
+          }
 
           // Buscar fonte
           const { rows: fontes } = await pool.query(
@@ -57,7 +77,7 @@ export async function rotasImportacao(app: FastifyInstance) {
         [sucesso, erros, importacao.id],
       );
 
-      reply.send({ data: { id: importacao.id, sucesso, erros, total: linhas.length } });
+      reply.send({ data: { id: importacao.id, sucesso, erros, total: linhas.length, nao_encontrados: naoEncontrados } });
     } catch (e) { tratarErro(e, reply); }
   });
 
@@ -100,15 +120,27 @@ export async function rotasImportacao(app: FastifyInstance) {
                 ) AS cotacoes_item
          FROM itens_cesta ic
          JOIN produtos_catalogo pc ON ic.produto_id = pc.id
+         JOIN cestas c ON c.id = ic.cesta_id
+         JOIN secretarias sec ON sec.id = c.secretaria_id
          LEFT JOIN unidades_medida um ON pc.unidade_medida_id = um.id
          LEFT JOIN precos_item pi ON pi.item_cesta_id = ic.id AND pi.excluido_calculo = false
          LEFT JOIN fornecedores f ON pi.fornecedor_id = f.id
          LEFT JOIN fontes fo ON pi.fonte_id = fo.id
-         WHERE ic.cesta_id = $1
+         WHERE ic.cesta_id = $1 AND sec.municipio_id = $2
          GROUP BY ic.id, ic.quantidade, ic.produto_id, pc.descricao, pc.codigo_catmat, pc.unidade, um.sigla
          ORDER BY pc.descricao`,
-        [cestaId],
+        [cestaId, req.usuario!.servidor!.municipio_id],
       );
+
+      if (rows.length === 0) {
+        // Verificar se a cesta existe para diferenciar 404 de resultado vazio
+        const { rows: cestaCheck } = await getPool().query(
+          `SELECT 1 FROM cestas c JOIN secretarias sec ON c.secretaria_id = sec.id
+           WHERE c.id = $1 AND sec.municipio_id = $2`,
+          [cestaId, req.usuario!.servidor!.municipio_id],
+        );
+        if (!cestaCheck[0]) return reply.status(404).send({ error: "Cesta não encontrada" });
+      }
 
       reply.send({ data: rows });
     } catch (e) { tratarErro(e, reply); }

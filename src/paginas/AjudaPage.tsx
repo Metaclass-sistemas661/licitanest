@@ -200,14 +200,14 @@ export function AjudaPage() {
           ))
         )}
 
-        {/* Vídeos tutoriais placeholder */}
+        {/* Recursos adicionais */}
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <Video className="h-8 w-8 text-primary" />
             <div>
-              <p className="font-medium">Vídeos Tutoriais</p>
+              <p className="font-medium">Central de Conhecimento</p>
               <p className="text-sm text-muted-foreground">
-                Em breve, vídeos passo-a-passo de cada funcionalidade do sistema.
+                Consulte a documentação completa, guias de uso e normativos (IN 65/2021, Decreto 11.462) na seção de Ajuda ou entre em contato pelo suporte.
               </p>
             </div>
           </CardContent>

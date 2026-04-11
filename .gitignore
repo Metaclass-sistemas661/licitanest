@@ -9,6 +9,12 @@ dist/
 .env.local
 .env.*.local
 
+# Binários locais (Cloud SQL Proxy, etc)
+bin/
+
+# Load test results
+loadtest/results.json
+
 # IDE
 .vscode/*
 !.vscode/extensions.json

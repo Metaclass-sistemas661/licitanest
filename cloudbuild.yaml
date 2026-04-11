@@ -21,10 +21,17 @@ steps:
     entrypoint: "npm"
     args: ["run", "lint"]
 
-  # 3. Testes unitários
+  # 3. Testes unitários (frontend)
   - name: "node:22-alpine"
     entrypoint: "npm"
     args: ["run", "test"]
+
+  # 3b. Instalar dependências e rodar testes do backend (API)
+  - name: "node:22-alpine"
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - "cd api && npm ci && npm run test"
 
   # 4. Auditoria de vulnerabilidades
   - name: "node:22-alpine"

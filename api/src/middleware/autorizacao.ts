@@ -31,6 +31,50 @@ export function exigirAdmin(
   done();
 }
 
+// Hierarquia Gov.br: ouro > prata > bronze
+const HIERARQUIA_GOVBR: Record<string, number> = { bronze: 1, prata: 2, ouro: 3 };
+
+/**
+ * Exige nível mínimo de confiabilidade Gov.br.
+ * Política: bronze = somente leitura, prata = operação, ouro = administração.
+ */
+export function exigirNivelGovBr(nivelMinimo: "bronze" | "prata" | "ouro") {
+  return function (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: () => void,
+  ): void {
+    const nivel = request.usuario?.servidor?.nivel_govbr;
+    if (!nivel) {
+      // Sem nível Gov.br = acesso via email/senha; permitir operações básicas (equivale a bronze)
+      if (nivelMinimo === "bronze") {
+        done();
+        return;
+      }
+      reply.status(403).send({
+        error: `Acesso requer autenticação Gov.br nível ${nivelMinimo} ou superior`,
+        nivel_atual: null,
+        nivel_minimo: nivelMinimo,
+      });
+      return;
+    }
+
+    const nivelAtual = HIERARQUIA_GOVBR[nivel] ?? 0;
+    const nivelRequerido = HIERARQUIA_GOVBR[nivelMinimo] ?? 0;
+
+    if (nivelAtual < nivelRequerido) {
+      reply.status(403).send({
+        error: `Nível Gov.br insuficiente. Requer ${nivelMinimo}, atual: ${nivel}`,
+        nivel_atual: nivel,
+        nivel_minimo: nivelMinimo,
+      });
+      return;
+    }
+
+    done();
+  };
+}
+
 /**
  * Adiciona filtro WHERE por município na query SQL.
  * Filtra dados por município do servidor autenticado.

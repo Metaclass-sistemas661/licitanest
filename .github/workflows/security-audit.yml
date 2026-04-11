@@ -1,0 +1,46 @@
+name: Security – Dependency Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Toda segunda às 08:00 UTC (05:00 BRT)
+    - cron: "0 8 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [".", "api", "cloud-functions/asaas-webhook", "cloud-functions/atualizar-indices"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: cd ${{ matrix.dir }} && npm ci --legacy-peer-deps
+        continue-on-error: true
+
+      - name: npm audit (high + critical)
+        run: cd ${{ matrix.dir }} && npm audit --audit-level=high --omit=dev
+        continue-on-error: true
+
+      - name: npm audit JSON report
+        run: cd ${{ matrix.dir }} && npm audit --json > audit-report.json || true
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-${{ strategy.job-index }}
+          path: ${{ matrix.dir }}/audit-report.json
+          retention-days: 30

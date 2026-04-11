@@ -22,13 +22,13 @@ export const DOCUMENTOS_LGPD: Record<TipoConsentimento, {
   termos_uso: {
     titulo: "Termos de Uso",
     descricao: "Termos e condições de uso da plataforma LicitaNest",
-    versao: "1.0",
+    versao: "1.1",
     obrigatorio: true,
   },
   politica_privacidade: {
     titulo: "Política de Privacidade",
     descricao: "Como coletamos, usamos e protegemos seus dados pessoais",
-    versao: "1.0",
+    versao: "1.1",
     obrigatorio: true,
   },
   cookies: {
@@ -49,11 +49,9 @@ export const DOCUMENTOS_LGPD: Record<TipoConsentimento, {
 // CONSENTIMENTOS
 // ══════════════════════════════════════════════════════
 
-export async function listarConsentimentos(
-  servidorId: string,
-): Promise<ConsentimentoLgpd[]> {
+export async function listarConsentimentos(): Promise<ConsentimentoLgpd[]> {
   const { data } = await api.get<{ data: ConsentimentoLgpd[] }>(
-    `/api/lgpd/consentimentos?servidor_id=${encodeURIComponent(servidorId)}`
+    `/api/lgpd/consentimentos`
   );
   return data ?? [];
 }
@@ -69,21 +67,31 @@ export async function obterConsentimento(
 }
 
 export async function registrarConsentimento(
-  servidorId: string,
+  _servidorId: string,
   tipo: TipoConsentimento,
   aceito: boolean,
 ): Promise<ConsentimentoLgpd> {
   const { data } = await api.post<{ data: ConsentimentoLgpd }>("/api/lgpd/consentimentos", {
-    servidor_id: servidorId,
     tipo,
     aceito,
-    versao_documento: DOCUMENTOS_LGPD[tipo].versao,
-    aceito_em: aceito ? new Date().toISOString() : null,
-    ip_address: null,
-    user_agent: navigator.userAgent,
   });
 
   return data as ConsentimentoLgpd;
+}
+
+export async function verificarAceitePendente(): Promise<{ pendente: boolean; versao_atual: string }> {
+  const { data } = await api.get<{ data: { pendente: boolean; versao_atual: string } }>("/api/lgpd/aceite-pendente");
+  return data as { pendente: boolean; versao_atual: string };
+}
+
+export async function exportarDadosTitular(): Promise<{ url: string; expira_em: string }> {
+  const { data } = await api.post<{ data: { url: string; expira_em: string } }>("/api/lgpd/exportar-dados");
+  return data as { url: string; expira_em: string };
+}
+
+export async function obterRIPD(): Promise<Record<string, unknown>> {
+  const { data } = await api.get<{ data: Record<string, unknown> }>("/api/lgpd/ripd");
+  return data as Record<string, unknown>;
 }
 
 export async function revogarConsentimento(
@@ -99,9 +107,9 @@ export async function revogarConsentimento(
 }
 
 export async function verificarConsentimentosObrigatorios(
-  servidorId: string,
+  _servidorId: string,
 ): Promise<{ pendentes: TipoConsentimento[]; todos_aceitos: boolean }> {
-  const consentimentos = await listarConsentimentos(servidorId);
+  const consentimentos = await listarConsentimentos();
   const pendentes: TipoConsentimento[] = [];
 
   for (const [tipo, doc] of Object.entries(DOCUMENTOS_LGPD)) {
@@ -274,7 +282,7 @@ export async function gerarRelatorioDadosPessoais(servidorId: string): Promise<{
     `/api/servidores/${encodeURIComponent(servidorId)}?fields=id,nome,email,cpf,matricula,telefone,criado_em,ultimo_acesso`
   );
 
-  const consentimentos = await listarConsentimentos(servidorId);
+  const consentimentos = await listarConsentimentos();
   const solicitacoes = await listarSolicitacoesLgpd(servidorId);
 
   return {

@@ -15,6 +15,13 @@ export function tratarErro(error: unknown, reply: FastifyReply): void {
   }
 
   const msg = error instanceof Error ? error.message : "Erro interno";
-  console.error("[API Error]", error);
-  reply.status(500).send({ error: msg });
+
+  // Structured logging via Fastify's built-in Pino logger
+  reply.log.error(
+    { err: error, statusCode: 500 },
+    `[API Error] ${msg}`,
+  );
+
+  // Nunca vazar detalhes internos para o cliente
+  reply.status(500).send({ error: "Erro interno do servidor" });
 }

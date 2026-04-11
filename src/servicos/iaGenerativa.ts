@@ -1,4 +1,4 @@
-// Serviço de IA Generativa — Integração real com OpenAI/Anthropic
+// Serviço de IA Generativa — Integração com Vertex AI (Google Gemini)
 // Sugestão de fontes, análise de preços, geração de justificativas, pesquisa natural
 import { api } from "@/lib/api";
 import type { InteracaoIA, TipoInteracaoIA, ItemCesta, MetodologiaCalculo } from "@/tipos";
@@ -76,12 +76,9 @@ async function salvarInteracao(
 }
 
 function estimarCusto(resp: RespostaIA): number {
-  // Estimativa de custo por token (USD)
-  if (resp.modelo.includes("claude")) {
-    return (resp.tokens_input * 0.003 + resp.tokens_output * 0.015) / 1000;
-  }
-  // gpt-4o-mini
-  return (resp.tokens_input * 0.00015 + resp.tokens_output * 0.0006) / 1000;
+  // Vertex AI Gemini — custo por token (USD)
+  // gemini-2.0-flash: input $0.10/1M tokens, output $0.40/1M tokens
+  return (resp.tokens_input * 0.0001 + resp.tokens_output * 0.0004) / 1000;
 }
 
 // ══════════════════════════════════════════════════════

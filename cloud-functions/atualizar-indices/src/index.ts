@@ -98,33 +98,47 @@ function parseBCB(json: unknown[], tipo: string): IndiceValor[] {
   return resultados;
 }
 
-// ── Buscar índice de uma fonte ───────────────────────
+// ── Buscar índice de uma fonte (com retry + exponential backoff) ──
 
 async function buscarIndice(config: typeof INDICES_CONFIG[0]): Promise<IndiceValor[]> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const MAX_TENTATIVAS = 3;
+  const BACKOFF_BASE_MS = 1000; // 1s, 2s, 4s
 
-  try {
-    const resp = await fetch(config.url, {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    });
-    if (!resp.ok) {
-      console.warn(`[${config.tipo}] HTTP ${resp.status}: ${resp.statusText}`);
-      return [];
-    }
-    const json = await resp.json();
+  for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    if (config.tipo === "IGP-M") {
-      return parseBCB(json as unknown[], config.tipo);
+    try {
+      const resp = await fetch(config.url, {
+        signal: controller.signal,
+        headers: { Accept: "application/json" },
+      });
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+      }
+      const json = await resp.json();
+
+      if (config.tipo === "IGP-M") {
+        return parseBCB(json as unknown[], config.tipo);
+      }
+      return parseSIDRA(json as unknown[], config.tipo);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[${config.tipo}] Tentativa ${tentativa}/${MAX_TENTATIVAS} falhou: ${msg}`);
+
+      if (tentativa < MAX_TENTATIVAS) {
+        const delayMs = BACKOFF_BASE_MS * Math.pow(2, tentativa - 1);
+        console.info(`[${config.tipo}] Aguardando ${delayMs}ms antes de retry...`);
+        await new Promise((r) => setTimeout(r, delayMs));
+      } else {
+        console.error(`[${config.tipo}] Todas as ${MAX_TENTATIVAS} tentativas falharam. Dados não obtidos.`);
+      }
+    } finally {
+      clearTimeout(timeout);
     }
-    return parseSIDRA(json as unknown[], config.tipo);
-  } catch (err) {
-    console.warn(`[${config.tipo}] Erro ao buscar:`, err);
-    return [];
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return [];
 }
 
 // ── Upsert no banco ─────────────────────────────────
@@ -176,6 +190,21 @@ ff.http("atualizarIndices", async (req, res) => {
        VALUES ('atualizacao_indices', 'Atualização automática mensal de índices', $1)`,
       [JSON.stringify(resultados)],
     );
+
+    // Registrar alerta para fontes que falharam completamente
+    const falhas = resultados.filter((r) => r.importados === 0 && r.erro);
+    if (falhas.length > 0) {
+      console.error(`[atualizar-indices] ALERTA: ${falhas.length} fonte(s) falharam após retry:`,
+        falhas.map((f) => f.tipo).join(", "));
+      await db.query(
+        `INSERT INTO auditoria (tipo, descricao, dados_extra)
+         VALUES ('alerta_indices_falha', $1, $2)`,
+        [
+          `Falha ao atualizar ${falhas.length} índice(s) após 3 tentativas: ${falhas.map((f) => f.tipo).join(", ")}`,
+          JSON.stringify(falhas),
+        ],
+      );
+    }
 
     const totalImportados = resultados.reduce((s, r) => s + r.importados, 0);
     console.log(`[atualizar-indices] Finalizado. Total: ${totalImportados} índices atualizados.`);

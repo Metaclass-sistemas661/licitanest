@@ -24,12 +24,17 @@ CREATE TABLE usuarios (
     email_verificado BOOLEAN NOT NULL DEFAULT FALSE,
     ativo           BOOLEAN NOT NULL DEFAULT TRUE,
     ultimo_login    TIMESTAMPTZ,
+    cpf             VARCHAR(14) UNIQUE,
+    nivel_govbr     VARCHAR(10),
+    provedor        VARCHAR(20) DEFAULT 'email',
     criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    atualizado_em   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    atualizado_em   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deletado_em     TIMESTAMPTZ
 );
 
 CREATE INDEX idx_usuarios_firebase ON usuarios(firebase_uid);
 CREATE INDEX idx_usuarios_email ON usuarios(email);
+CREATE INDEX idx_usuarios_cpf ON usuarios(cpf) WHERE cpf IS NOT NULL;
 
 -- =============================================================================
 -- 1. TABELAS DE ADMINISTRAÇÃO E ACESSO
@@ -82,6 +87,7 @@ CREATE TABLE servidores (
     totp_secret     TEXT,
     totp_ativado    BOOLEAN DEFAULT FALSE,
     totp_ativado_em TIMESTAMPTZ,
+    totp_recovery_codes TEXT,
     ultimo_ip       INET,
     ultimo_user_agent TEXT,
     criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -113,11 +119,13 @@ CREATE TABLE audit_log (
     servidor_id     UUID REFERENCES servidores(id),
     acao            VARCHAR(50) NOT NULL,
     tabela          VARCHAR(100),
-    registro_id     UUID,
+    registro_id     TEXT,
     dados_anteriores JSONB,
     dados_novos     JSONB,
     ip_address      TEXT,
     user_agent      TEXT,
+    hash            TEXT,
+    hash_anterior   TEXT,
     criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -218,7 +226,7 @@ CREATE INDEX idx_solicitacoes_solicitante ON solicitacoes_catalogo(solicitante_i
 
 CREATE TABLE fornecedores (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    cpf_cnpj        VARCHAR(18) NOT NULL UNIQUE,
+    cpf_cnpj        VARCHAR(18) NOT NULL,
     razao_social    TEXT NOT NULL,
     nome_fantasia   TEXT,
     rua             TEXT,
@@ -230,13 +238,16 @@ CREATE TABLE fornecedores (
     uf              CHAR(2),
     telefone        VARCHAR(20),
     email           TEXT,
+    municipio_id    UUID NOT NULL REFERENCES municipios(id),
     ativo           BOOLEAN NOT NULL DEFAULT TRUE,
     criado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     atualizado_em   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    deletado_em     TIMESTAMPTZ
+    deletado_em     TIMESTAMPTZ,
+    UNIQUE(cpf_cnpj, municipio_id)
 );
 
 CREATE INDEX idx_fornecedores_cpf_cnpj ON fornecedores(cpf_cnpj);
+CREATE INDEX idx_fornecedores_municipio ON fornecedores(municipio_id) WHERE deletado_em IS NULL;
 CREATE INDEX idx_fornecedores_razao ON fornecedores USING GIN (razao_social gin_trgm_ops);
 
 -- =============================================================================
@@ -675,7 +686,7 @@ CREATE TABLE cotacao_fornecedores (
     cpf_cnpj            VARCHAR(18),
     email               TEXT NOT NULL,
     telefone            VARCHAR(20),
-    token_acesso        UUID NOT NULL DEFAULT uuid_generate_v4(),
+    token_acesso        TEXT NOT NULL,
     token_expira_em     TIMESTAMPTZ NOT NULL,
     email_enviado       BOOLEAN NOT NULL DEFAULT FALSE,
     email_enviado_em    TIMESTAMPTZ,
@@ -1018,7 +1029,9 @@ CREATE TABLE consentimentos_lgpd (
     versao_documento TEXT NOT NULL DEFAULT '1.0',
     aceito_em TIMESTAMPTZ,
     revogado_em TIMESTAMPTZ,
-    criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+    atualizado_em TIMESTAMPTZ DEFAULT now(),
+    UNIQUE (servidor_id, tipo)
 );
 
 CREATE INDEX idx_consentimentos_servidor ON consentimentos_lgpd(servidor_id);
@@ -1058,7 +1071,7 @@ CREATE TABLE interacoes_ia (
     tipo TEXT NOT NULL CHECK (tipo IN ('sugestao_fonte', 'analise_preco', 'texto_justificativa', 'pesquisa_natural', 'memorial_calculo')),
     prompt TEXT NOT NULL,
     resposta TEXT,
-    modelo TEXT NOT NULL DEFAULT 'gpt-4o-mini',
+    modelo TEXT NOT NULL DEFAULT 'gemini-2.0-flash',
     tokens_input INTEGER,
     tokens_output INTEGER,
     custo_estimado NUMERIC(10,6),
@@ -1549,6 +1562,215 @@ INSERT INTO planos (nome, titulo, descricao, preco_mensal, preco_anual, limite_u
      '["catalogo","cestas_basico","pesquisa_rapida","cotacoes","fornecedores","relatorios","comparador","templates","historico","mapa_calor","alertas","sicom","ia","ocr"]'),
     ('enterprise', 'Enterprise', 'Para grandes municípios e consórcios', 59900, 599000, 999, 999, 999,
      '["catalogo","cestas_basico","pesquisa_rapida","cotacoes","fornecedores","relatorios","comparador","templates","historico","mapa_calor","alertas","sicom","ia","ocr","api_rest","suporte_prioritario","sla_99_9"]');
+
+-- =============================================================================
+-- ROW-LEVEL SECURITY (RLS) — Isolamento multi-tenant por municipio_id
+-- =============================================================================
+-- A aplicação deve executar: SET LOCAL app.current_municipio_id = '<uuid>';
+-- no início de cada transação autenticada.
+-- =============================================================================
+
+-- Role da aplicação (revogar superuser)
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_user') THEN
+    CREATE ROLE app_user NOLOGIN;
+  END IF;
+END $$;
+GRANT USAGE ON SCHEMA public TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO app_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO app_user;
+-- Revogar mutações no audit_log (append-only)
+REVOKE UPDATE, DELETE ON audit_log FROM app_user;
+
+-- Helper: retorna municipio_id configurado na sessão
+CREATE OR REPLACE FUNCTION current_municipio_id() RETURNS UUID AS $$
+  SELECT NULLIF(current_setting('app.current_municipio_id', true), '')::UUID;
+$$ LANGUAGE sql STABLE;
+
+-- ── fornecedores (direto) ───────────────────────────────────
+ALTER TABLE fornecedores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fornecedores FORCE ROW LEVEL SECURITY;
+CREATE POLICY fornecedores_tenant ON fornecedores
+  USING (municipio_id = current_municipio_id())
+  WITH CHECK (municipio_id = current_municipio_id());
+
+-- ── servidores (via secretarias) ────────────────────────────
+ALTER TABLE servidores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE servidores FORCE ROW LEVEL SECURITY;
+CREATE POLICY servidores_tenant ON servidores
+  USING (secretaria_id IN (SELECT id FROM secretarias WHERE municipio_id = current_municipio_id()))
+  WITH CHECK (secretaria_id IN (SELECT id FROM secretarias WHERE municipio_id = current_municipio_id()));
+
+-- ── cestas (via secretarias) ────────────────────────────────
+ALTER TABLE cestas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cestas FORCE ROW LEVEL SECURITY;
+CREATE POLICY cestas_tenant ON cestas
+  USING (secretaria_id IN (SELECT id FROM secretarias WHERE municipio_id = current_municipio_id()))
+  WITH CHECK (secretaria_id IN (SELECT id FROM secretarias WHERE municipio_id = current_municipio_id()));
+
+-- ── itens_cesta (via cestas → secretarias) ──────────────────
+ALTER TABLE itens_cesta ENABLE ROW LEVEL SECURITY;
+ALTER TABLE itens_cesta FORCE ROW LEVEL SECURITY;
+CREATE POLICY itens_cesta_tenant ON itens_cesta
+  USING (cesta_id IN (
+    SELECT c.id FROM cestas c
+    JOIN secretarias sec ON c.secretaria_id = sec.id
+    WHERE sec.municipio_id = current_municipio_id()
+  ));
+
+-- ── precos_item (via itens_cesta → cestas → secretarias) ────
+ALTER TABLE precos_item ENABLE ROW LEVEL SECURITY;
+ALTER TABLE precos_item FORCE ROW LEVEL SECURITY;
+CREATE POLICY precos_item_tenant ON precos_item
+  USING (item_cesta_id IN (
+    SELECT ic.id FROM itens_cesta ic
+    JOIN cestas c ON ic.cesta_id = c.id
+    JOIN secretarias sec ON c.secretaria_id = sec.id
+    WHERE sec.municipio_id = current_municipio_id()
+  ));
+
+-- ── documentos_comprobatorios (via precos_item chain) ───────
+ALTER TABLE documentos_comprobatorios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documentos_comprobatorios FORCE ROW LEVEL SECURITY;
+CREATE POLICY documentos_tenant ON documentos_comprobatorios
+  USING (preco_item_id IN (
+    SELECT pi.id FROM precos_item pi
+    JOIN itens_cesta ic ON pi.item_cesta_id = ic.id
+    JOIN cestas c ON ic.cesta_id = c.id
+    JOIN secretarias sec ON c.secretaria_id = sec.id
+    WHERE sec.municipio_id = current_municipio_id()
+  ));
+
+-- ── cotacoes (via cestas → secretarias) ─────────────────────
+ALTER TABLE cotacoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cotacoes FORCE ROW LEVEL SECURITY;
+CREATE POLICY cotacoes_tenant ON cotacoes
+  USING (cesta_id IN (
+    SELECT c.id FROM cestas c
+    JOIN secretarias sec ON c.secretaria_id = sec.id
+    WHERE sec.municipio_id = current_municipio_id()
+  ));
+
+-- =============================================================================
+-- AUDITORIA IMUTÁVEL — Hash Chain + Triggers de Proteção
+-- =============================================================================
+
+-- Trigger: calcula hash SHA-256 encadeado (blockchain-like) ao inserir no audit_log
+CREATE OR REPLACE FUNCTION calcular_hash_audit() RETURNS TRIGGER AS $$
+DECLARE
+  ultimo_hash TEXT;
+BEGIN
+  SELECT hash INTO ultimo_hash FROM audit_log ORDER BY criado_em DESC, id DESC LIMIT 1;
+  NEW.hash_anterior := COALESCE(ultimo_hash, 'GENESIS');
+  NEW.hash := encode(
+    sha256(
+      convert_to(
+        COALESCE(NEW.tabela, '') || '|' ||
+        COALESCE(NEW.acao, '') || '|' ||
+        COALESCE(NEW.registro_id, '') || '|' ||
+        COALESCE(NEW.dados_novos::text, '') || '|' ||
+        COALESCE(NEW.ip_address, '') || '|' ||
+        NEW.criado_em::text || '|' ||
+        COALESCE(NEW.hash_anterior, 'GENESIS'),
+        'UTF8'
+      )
+    ), 'hex');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_audit_hash BEFORE INSERT ON audit_log
+  FOR EACH ROW EXECUTE FUNCTION calcular_hash_audit();
+
+-- Trigger: rejeita UPDATE e DELETE no audit_log (imutabilidade TCU/TCE)
+CREATE OR REPLACE FUNCTION audit_log_imutavel() RETURNS TRIGGER AS $$
+BEGIN
+  RAISE EXCEPTION 'audit_log é imutável: operações UPDATE e DELETE não são permitidas (exigência TCU/TCE)';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_audit_imutavel BEFORE UPDATE OR DELETE ON audit_log
+  FOR EACH ROW EXECUTE FUNCTION audit_log_imutavel();
+
+-- =============================================================================
+-- AUDITORIA AUTOMÁTICA — Trigger genérico para tabelas sensíveis
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION audit_trigger_func() RETURNS TRIGGER AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO audit_log (acao, tabela, registro_id, dados_novos)
+    VALUES ('INSERT', TG_TABLE_NAME, NEW.id::text, to_jsonb(NEW));
+    RETURN NEW;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    INSERT INTO audit_log (acao, tabela, registro_id, dados_anteriores, dados_novos)
+    VALUES ('UPDATE', TG_TABLE_NAME, NEW.id::text, to_jsonb(OLD), to_jsonb(NEW));
+    RETURN NEW;
+  ELSIF (TG_OP = 'DELETE') THEN
+    INSERT INTO audit_log (acao, tabela, registro_id, dados_anteriores)
+    VALUES ('DELETE', TG_TABLE_NAME, OLD.id::text, to_jsonb(OLD));
+    RETURN OLD;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Aplicar em tabelas sensíveis (mutações registradas automaticamente)
+CREATE TRIGGER trg_audit_cestas AFTER INSERT OR UPDATE OR DELETE ON cestas
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_itens_cesta AFTER INSERT OR UPDATE OR DELETE ON itens_cesta
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_precos_item AFTER INSERT OR UPDATE OR DELETE ON precos_item
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_fornecedores AFTER INSERT OR UPDATE OR DELETE ON fornecedores
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_cotacoes AFTER INSERT OR UPDATE OR DELETE ON cotacoes
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_servidores AFTER INSERT OR UPDATE OR DELETE ON servidores
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_documentos AFTER INSERT OR UPDATE OR DELETE ON documentos_comprobatorios
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_consentimentos AFTER INSERT OR UPDATE OR DELETE ON consentimentos_lgpd
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+CREATE TRIGGER trg_audit_solicitacoes AFTER INSERT OR UPDATE OR DELETE ON solicitacoes_lgpd
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+
+-- =============================================================================
+-- POLÍTICA DE RETENÇÃO DE DADOS (LGPD)
+-- Períodos: audit_log=5 anos, cestas concluídas=5 anos, usuários inativos=2 anos,
+--           interacoes_ia=1 ano, tokens expirados=30 dias
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION purgar_dados_expirados() RETURNS TABLE(tabela TEXT, registros_removidos BIGINT) AS $$
+DECLARE
+  n BIGINT;
+BEGIN
+  -- 1. Registrar purge no audit_log ANTES de executar
+  INSERT INTO audit_log (acao, tabela, dados_novos)
+  VALUES ('PURGE_LGPD', 'sistema', '{"descricao":"Execução automática de política de retenção LGPD"}'::jsonb);
+
+  -- 2. Tokens de cotação expirados (> 30 dias)
+  DELETE FROM cotacao_fornecedores WHERE token_expira_em < NOW() - INTERVAL '30 days';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  tabela := 'cotacao_fornecedores'; registros_removidos := n; RETURN NEXT;
+
+  -- 3. Interações de IA (> 1 ano)
+  DELETE FROM interacoes_ia WHERE criado_em < NOW() - INTERVAL '1 year';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  tabela := 'interacoes_ia'; registros_removidos := n; RETURN NEXT;
+
+  -- 4. Usuários inativos soft-deleted (> 2 anos do soft delete)
+  DELETE FROM usuarios WHERE deletado_em IS NOT NULL AND deletado_em < NOW() - INTERVAL '2 years';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  tabela := 'usuarios_inativos'; registros_removidos := n; RETURN NEXT;
+
+  -- 5. Audit logs (> 5 anos) — mínimo legal
+  DELETE FROM audit_log WHERE criado_em < NOW() - INTERVAL '5 years';
+  GET DIAGNOSTICS n = ROW_COUNT;
+  tabela := 'audit_log'; registros_removidos := n; RETURN NEXT;
+END;
+$$ LANGUAGE plpgsql;
 
 -- =============================================================================
 -- FIM DO SCHEMA CONSOLIDADO

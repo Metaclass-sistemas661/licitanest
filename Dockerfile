@@ -33,5 +33,8 @@ USER nginx
 # Porta padrão Cloud Run
 EXPOSE 8080
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:8080/ || exit 1
+
 # Nginx já roda como daemon off por padrão no container
 CMD ["nginx", "-g", "daemon off;"]

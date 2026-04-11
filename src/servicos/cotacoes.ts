@@ -3,7 +3,7 @@
 // CRUD de cotações, convites a fornecedores, respostas, lançamentos manuais,
 // portal público, transferência para cesta
 // ═══════════════════════════════════════════════════════════════════════════════
-import { api } from "@/lib/api";
+import { api, apiRequest } from "@/lib/api";
 import type {
   Cotacao,
   CotacaoItem,
@@ -174,10 +174,19 @@ export async function salvarRespostasPortal(
     nome_responsavel?: string;
     cpf_responsavel?: string;
   },
+  csrfToken?: string,
 ) {
-  const { data } = await api.post<{ data: number }>(
+  const headers: Record<string, string> = {};
+  if (csrfToken) {
+    headers["x-csrf-token"] = csrfToken;
+  }
+  const { data } = await apiRequest<{ data: number }>(
     `/api/cotacao-fornecedores/${encodeURIComponent(fornecedorId)}/respostas`,
-    { respostas, dadosFornecedor },
+    {
+      method: "POST",
+      body: JSON.stringify({ respostas, dadosFornecedor, csrf_token: csrfToken }),
+      headers,
+    },
   );
   return data;
 }

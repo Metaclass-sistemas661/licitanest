@@ -9,7 +9,31 @@ export async function rotasDashboard(app: FastifyInstance) {
   app.addHook("preHandler", exigirServidor);
 
   // GET /api/dashboard/metricas
-  app.get("/api/dashboard/metricas", async (req, reply) => {
+  app.get("/api/dashboard/metricas", {
+    schema: {
+      tags: ["Dashboard"],
+      summary: "Métricas gerais do município",
+      description: "Retorna contagem de cestas, produtos, fornecedores e cotações do município autenticado.",
+      security: [{ bearerAuth: [] }],
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            data: {
+              type: "object",
+              properties: {
+                total_cestas: { type: "integer" },
+                cestas_concluidas: { type: "integer" },
+                total_produtos: { type: "integer" },
+                total_fornecedores: { type: "integer" },
+                total_cotacoes: { type: "integer" },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, async (req, reply) => {
     try {
       const municipioId = req.usuario!.servidor!.municipio_id;
 

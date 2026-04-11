@@ -18,6 +18,42 @@ const EXTENSOES_PERMITIDAS = new Set([".pdf", ".jpg", ".jpeg", ".png", ".webp", 
 const MAX_TAMANHO = 10 * 1024 * 1024; // 10 MB
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Quotas de storage por plano (em bytes)
+const QUOTA_POR_PLANO: Record<string, number> = {
+  gratuito: 100 * 1024 * 1024,        // 100 MB
+  basico: 1024 * 1024 * 1024,         // 1 GB
+  profissional: 5 * 1024 * 1024 * 1024, // 5 GB
+  enterprise: 10 * 1024 * 1024 * 1024,  // 10 GB
+};
+
+async function obterUsoStorage(municipioId: string): Promise<{ uso_bytes: number; quota_bytes: number; plano: string }> {
+  const pool = getPool();
+  // Calcular uso total (soma dos tamanhos dos documentos do município)
+  const { rows: [usoRow] } = await pool.query(
+    `SELECT COALESCE(SUM(dc.tamanho_bytes), 0)::bigint AS uso_bytes
+     FROM documentos_comprobatorios dc
+     JOIN precos_item pi ON dc.preco_item_id = pi.id
+     JOIN itens_cesta ic ON pi.item_cesta_id = ic.id
+     JOIN cestas c ON ic.cesta_id = c.id
+     JOIN secretarias sec ON c.secretaria_id = sec.id
+     WHERE sec.municipio_id = $1`,
+    [municipioId],
+  );
+
+  // Buscar plano ativo do município
+  const { rows: [assinatura] } = await pool.query(
+    `SELECT p.nome FROM assinaturas a
+     JOIN planos p ON a.plano_id = p.id
+     WHERE a.municipio_id = $1 AND a.status = 'ativa'
+     ORDER BY a.criado_em DESC LIMIT 1`,
+    [municipioId],
+  );
+  const plano = assinatura?.nome ?? "gratuito";
+  const quota = QUOTA_POR_PLANO[plano] ?? QUOTA_POR_PLANO.gratuito;
+
+  return { uso_bytes: Number(usoRow.uso_bytes), quota_bytes: quota, plano };
+}
+
 function validarArquivo(mimetype: string, filename: string, tamanho: number): string | null {
   if (!TIPOS_PERMITIDOS.has(mimetype)) return `Tipo de arquivo não permitido: ${mimetype}`;
   const ext = filename.substring(filename.lastIndexOf(".")).toLowerCase();
@@ -57,8 +93,19 @@ export async function rotasStorage(app: FastifyInstance) {
       );
       if (!acesso[0]) return reply.status(403).send({ error: "Sem acesso a este recurso" });
 
+      // Verificar quota de armazenamento do município
+      const municipioId = req.usuario!.servidor!.municipio_id;
+      const { uso_bytes, quota_bytes, plano } = await obterUsoStorage(municipioId);
+      if (uso_bytes + buffer.length > quota_bytes) {
+        return reply.status(413).send({
+          error: "Quota de armazenamento excedida",
+          uso_bytes, quota_bytes, plano,
+          disponivel_bytes: Math.max(0, quota_bytes - uso_bytes),
+        });
+      }
+
       const safeFilename = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `documentos/${precoId}/${Date.now()}_${safeFilename}`;
+      const storagePath = `municipio_${municipioId}/documentos/${precoId}/${Date.now()}_${safeFilename}`;
       const file = bucketDocs.file(storagePath);
       await file.save(buffer, { contentType: data.mimetype });
 
@@ -95,8 +142,19 @@ export async function rotasStorage(app: FastifyInstance) {
       );
       if (!acesso[0]) return reply.status(403).send({ error: "Sem acesso a este recurso" });
 
+      // Verificar quota de armazenamento do município
+      const municipioId = req.usuario!.servidor!.municipio_id;
+      const { uso_bytes, quota_bytes, plano } = await obterUsoStorage(municipioId);
+      if (uso_bytes + buffer.length > quota_bytes) {
+        return reply.status(413).send({
+          error: "Quota de armazenamento excedida",
+          uso_bytes, quota_bytes, plano,
+          disponivel_bytes: Math.max(0, quota_bytes - uso_bytes),
+        });
+      }
+
       const safeFilename = fileData.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `documentos/${precoItemId}/${Date.now()}_${safeFilename}`;
+      const storagePath = `municipio_${municipioId}/documentos/${precoItemId}/${Date.now()}_${safeFilename}`;
       const file = bucketDocs.file(storagePath);
       await file.save(buffer, { contentType: fileData.mimetype });
 
@@ -113,8 +171,16 @@ export async function rotasStorage(app: FastifyInstance) {
   app.get("/api/documentos/:id/download", async (req, reply) => {
     try {
       const { id } = req.params as { id: string };
+
+      // Validar ownership: documento → preço → item → cesta → secretaria → município
       const { rows } = await getPool().query(
-        `SELECT * FROM documentos_comprobatorios WHERE id = $1`, [id],
+        `SELECT dc.storage_path FROM documentos_comprobatorios dc
+         JOIN precos_item pi2 ON pi2.id = dc.preco_item_id
+         JOIN itens_cesta ic ON ic.id = pi2.item_cesta_id
+         JOIN cestas c ON c.id = ic.cesta_id
+         JOIN secretarias sec ON sec.id = c.secretaria_id
+         WHERE dc.id = $1 AND sec.municipio_id = $2`,
+        [id, req.usuario!.servidor!.municipio_id],
       );
       if (!rows[0]) return reply.status(404).send({ error: "Documento não encontrado" });
 
@@ -132,10 +198,22 @@ export async function rotasStorage(app: FastifyInstance) {
       const { path, expiresIn } = req.query as { path?: string; expiresIn?: string };
       if (!path) return reply.status(400).send({ error: "Parâmetro 'path' obrigatório" });
 
+      // Validar ownership: storage_path → documento → preço → item → cesta → secretaria → município
+      const { rows: acessoCheck } = await getPool().query(
+        `SELECT 1 FROM documentos_comprobatorios dc
+         JOIN precos_item pi2 ON pi2.id = dc.preco_item_id
+         JOIN itens_cesta ic ON ic.id = pi2.item_cesta_id
+         JOIN cestas c ON c.id = ic.cesta_id
+         JOIN secretarias sec ON sec.id = c.secretaria_id
+         WHERE dc.storage_path = $1 AND sec.municipio_id = $2`,
+        [path, req.usuario!.servidor!.municipio_id],
+      );
+      if (!acessoCheck[0]) return reply.status(403).send({ error: "Sem acesso a este recurso" });
+
       const expireMs = parseInt(expiresIn || "3600") * 1000;
       const [signedUrl] = await bucketDocs.file(path).getSignedUrl({
         action: "read",
-        expires: Date.now() + Math.min(expireMs, 7 * 24 * 60 * 60 * 1000), // max 7 dias
+        expires: Date.now() + Math.min(expireMs, 15 * 60 * 1000), // max 15 min
       });
       reply.send({ data: { signedUrl, url: signedUrl } });
     } catch (e) { tratarErro(e, reply); }
@@ -146,6 +224,18 @@ export async function rotasStorage(app: FastifyInstance) {
     try {
       const { path } = req.query as { path?: string };
       if (!path) return reply.status(400).send({ error: "Parâmetro 'path' obrigatório" });
+
+      // Validar ownership: storage_path → documento → preço → item → cesta → secretaria → município
+      const { rows: acessoCheck } = await getPool().query(
+        `SELECT 1 FROM documentos_comprobatorios dc
+         JOIN precos_item pi2 ON pi2.id = dc.preco_item_id
+         JOIN itens_cesta ic ON ic.id = pi2.item_cesta_id
+         JOIN cestas c ON c.id = ic.cesta_id
+         JOIN secretarias sec ON sec.id = c.secretaria_id
+         WHERE dc.storage_path = $1 AND sec.municipio_id = $2`,
+        [path, req.usuario!.servidor!.municipio_id],
+      );
+      if (!acessoCheck[0]) return reply.status(403).send({ error: "Sem acesso a este recurso" });
 
       const [downloadUrl] = await bucketDocs.file(path).getSignedUrl({
         action: "read",
@@ -207,6 +297,25 @@ export async function rotasStorage(app: FastifyInstance) {
         await getPool().query(`DELETE FROM documentos_comprobatorios WHERE id = $1`, [id]);
       }
       reply.status(204).send();
+    } catch (e) { tratarErro(e, reply); }
+  });
+
+  // GET /api/storage/uso — consultar uso de armazenamento do município
+  app.get("/api/storage/uso", async (req, reply) => {
+    try {
+      const municipioId = req.usuario!.servidor!.municipio_id;
+      const info = await obterUsoStorage(municipioId);
+      const percentual = info.quota_bytes > 0
+        ? Math.round((info.uso_bytes / info.quota_bytes) * 10000) / 100
+        : 0;
+
+      reply.send({
+        data: {
+          ...info,
+          disponivel_bytes: Math.max(0, info.quota_bytes - info.uso_bytes),
+          percentual_usado: percentual,
+        },
+      });
     } catch (e) { tratarErro(e, reply); }
   });
 }

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
-import { exigirServidor } from "../middleware/autorizacao.js";
+import { exigirServidor, exigirNivelGovBr } from "../middleware/autorizacao.js";
 import { tratarErro } from "../utils/erros.js";
 
 export async function rotasWorkflow(app: FastifyInstance) {
@@ -33,8 +33,8 @@ export async function rotasWorkflow(app: FastifyInstance) {
     } catch (e) { tratarErro(e, reply); }
   });
 
-  // POST /api/workflow/:cestaId/transicionar
-  app.post("/api/workflow/:cestaId/transicionar", async (req, reply) => {
+  // POST /api/workflow/:cestaId/transicionar — requer Gov.br nível prata+
+  app.post("/api/workflow/:cestaId/transicionar", { preHandler: exigirNivelGovBr("prata") }, async (req, reply) => {
     try {
       const { cestaId } = req.params as { cestaId: string };
       const { status_novo, servidor_id, observacoes, motivo_devolucao } = req.body as {

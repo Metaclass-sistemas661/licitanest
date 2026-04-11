@@ -68,12 +68,12 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {state.open && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/50 animate-in fade-in duration-200"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => handleClose(false)}
           />
           <div className="relative z-10 mx-4 w-full max-w-md animate-in zoom-in-95 fade-in duration-200 rounded-xl border bg-card p-6 shadow-xl">
             <div className="flex gap-4">
-              <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", v.icon)}>
+              <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full animate-pulse", v.icon)}>
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div className="flex-1 space-y-1">

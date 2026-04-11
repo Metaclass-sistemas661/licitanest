@@ -237,7 +237,7 @@ export function useConsentimentos(servidorId: string | undefined) {
     setCarregando(true);
     try {
       const [lista, check] = await Promise.all([
-        lgpdSvc.listarConsentimentos(servidorId),
+        lgpdSvc.listarConsentimentos(),
         lgpdSvc.verificarConsentimentosObrigatorios(servidorId),
       ]);
       setConsentimentos(lista);

@@ -102,10 +102,6 @@
         "destination": "/app.html"
       },
       {
-        "source": "/billing",
-        "destination": "/app.html"
-      },
-      {
         "source": "/metricas-uso",
         "destination": "/app.html"
       },
@@ -115,10 +111,6 @@
       },
       {
         "source": "/api-publica",
-        "destination": "/app.html"
-      },
-      {
-        "source": "/admin-metaclass",
         "destination": "/app.html"
       }
     ],

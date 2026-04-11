@@ -4,13 +4,47 @@ import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
 import { tratarErro } from "../utils/erros.js";
 import { parsePaginacao, respostaPaginada } from "../utils/paginacao.js";
+import { cacheGet, cacheSet, cacheInvalidar, cacheInvalidarPrefixo, CACHE_TTL, CACHE_KEY } from "../config/cache.js";
 
 export async function rotasCatalogo(app: FastifyInstance) {
   app.addHook("preHandler", verificarAuth);
   app.addHook("preHandler", exigirServidor);
 
   // GET /api/catalogo
-  app.get("/api/catalogo", async (req, reply) => {
+  app.get("/api/catalogo", {
+    schema: {
+      tags: ["Catálogo"],
+      summary: "Listar produtos do catálogo",
+      description: "Retorna lista paginada de produtos, com filtros por busca e categoria.",
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: "object",
+        properties: {
+          busca: { type: "string", description: "Texto para filtrar por descrição ou código" },
+          categoria_id: { type: "string", format: "uuid" },
+          pagina: { type: "integer", minimum: 1, default: 1 },
+          por_pagina: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+        },
+      },
+      response: {
+        200: {
+          type: "object",
+          properties: {
+            data: { type: "array", items: { type: "object" } },
+            paginacao: {
+              type: "object",
+              properties: {
+                pagina: { type: "integer" },
+                por_pagina: { type: "integer" },
+                total: { type: "integer" },
+                total_paginas: { type: "integer" },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, async (req, reply) => {
     try {
       const q = req.query as Record<string, string>;
       const pag = parsePaginacao(q);
@@ -51,12 +85,16 @@ export async function rotasCatalogo(app: FastifyInstance) {
     try {
       const { termo } = req.query as { termo: string };
       if (!termo || termo.length < 2) return reply.send({ data: [] });
+      const chave = CACHE_KEY.AUTOCOMPLETE(termo);
+      const cached = await cacheGet(chave);
+      if (cached) return reply.send({ data: cached });
       const { rows } = await getPool().query(
         `SELECT id, descricao, codigo FROM produtos_catalogo
          WHERE ativo = true AND (descricao ILIKE $1 OR codigo ILIKE $1)
          ORDER BY descricao LIMIT 15`,
         [`%${termo}%`],
       );
+      await cacheSet(chave, rows, CACHE_TTL.AUTOCOMPLETE);
       reply.send({ data: rows });
     } catch (e) { tratarErro(e, reply); }
   });
@@ -89,6 +127,7 @@ export async function rotasCatalogo(app: FastifyInstance) {
          VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
         [b.descricao, b.codigo, b.categoria_id, b.unidade_medida_id, b.especificacao, b.elemento_despesa_id],
       );
+      await cacheInvalidarPrefixo("catalogo:autocomplete:");
       reply.status(201).send({ data: rows[0] });
     } catch (e) { tratarErro(e, reply); }
   });
@@ -109,6 +148,7 @@ export async function rotasCatalogo(app: FastifyInstance) {
       const { rows } = await getPool().query(
         `UPDATE produtos_catalogo SET ${sets.join(", ")} WHERE id = $${params.length} RETURNING *`, params,
       );
+      await cacheInvalidarPrefixo("catalogo:autocomplete:");
       reply.send({ data: rows[0] });
     } catch (e) { tratarErro(e, reply); }
   });
@@ -116,7 +156,10 @@ export async function rotasCatalogo(app: FastifyInstance) {
   // ── Categorias / Unidades / Elementos ──────────
   app.get("/api/categorias", async (_req, reply) => {
     try {
+      const cached = await cacheGet(CACHE_KEY.CATEGORIAS);
+      if (cached) return reply.send({ data: cached });
       const { rows } = await getPool().query(`SELECT * FROM categorias ORDER BY nome`);
+      await cacheSet(CACHE_KEY.CATEGORIAS, rows, CACHE_TTL.CATEGORIAS);
       reply.send({ data: rows });
     } catch (e) { tratarErro(e, reply); }
   });
@@ -127,20 +170,27 @@ export async function rotasCatalogo(app: FastifyInstance) {
       const { rows } = await getPool().query(
         `INSERT INTO categorias (nome, descricao) VALUES ($1, $2) RETURNING *`, [nome, descricao],
       );
+      await cacheInvalidar(CACHE_KEY.CATEGORIAS);
       reply.status(201).send({ data: rows[0] });
     } catch (e) { tratarErro(e, reply); }
   });
 
   app.get("/api/unidades-medida", async (_req, reply) => {
     try {
+      const cached = await cacheGet(CACHE_KEY.UNIDADES_MEDIDA);
+      if (cached) return reply.send({ data: cached });
       const { rows } = await getPool().query(`SELECT * FROM unidades_medida ORDER BY descricao`);
+      await cacheSet(CACHE_KEY.UNIDADES_MEDIDA, rows, CACHE_TTL.UNIDADES_MEDIDA);
       reply.send({ data: rows });
     } catch (e) { tratarErro(e, reply); }
   });
 
   app.get("/api/elementos-despesa", async (_req, reply) => {
     try {
+      const cached = await cacheGet(CACHE_KEY.ELEMENTOS_DESPESA);
+      if (cached) return reply.send({ data: cached });
       const { rows } = await getPool().query(`SELECT * FROM elementos_despesa ORDER BY codigo`);
+      await cacheSet(CACHE_KEY.ELEMENTOS_DESPESA, rows, CACHE_TTL.ELEMENTOS_DESPESA);
       reply.send({ data: rows });
     } catch (e) { tratarErro(e, reply); }
   });

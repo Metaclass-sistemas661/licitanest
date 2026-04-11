@@ -5,6 +5,7 @@ import {
 import { Badge } from "@/componentes/ui/badge";
 import { Button } from "@/componentes/ui/button";
 import { Separator } from "@/componentes/ui/separator";
+import { motion } from "framer-motion";
 import {
   CheckCircle2,
   Clock,
@@ -56,13 +57,22 @@ export function WorkflowTimelineDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40"
+      <motion.div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         onClick={onFechar}
       />
 
       {/* Drawer */}
-      <div className="relative w-full max-w-lg bg-background shadow-xl overflow-y-auto">
+      <motion.div
+        className="relative w-full max-w-lg bg-background shadow-xl overflow-y-auto"
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+      >
         <div className="sticky top-0 bg-background z-10 p-4 border-b flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-lg">Histórico de Tramitações</h2>
@@ -114,22 +124,28 @@ export function WorkflowTimelineDrawer({
             </div>
           ) : (
             <div className="relative">
-              {/* Linha vertical da timeline */}
-              <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-border" />
+              {/* Linha vertical da timeline — gradient */}
+              <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-gradient-to-b from-primary via-primary/40 to-border" />
 
               <div className="space-y-0">
                 {tramitacoes.map((t, idx) => (
-                  <TimelineItem
+                  <motion.div
                     key={t.id || idx}
-                    tramitacao={t}
-                    primeiro={idx === 0}
-                  />
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.3 }}
+                  >
+                    <TimelineItem
+                      tramitacao={t}
+                      primeiro={idx === 0}
+                    />
+                  </motion.div>
                 ))}
               </div>
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -150,7 +166,7 @@ function TimelineItem({
       {/* Dot na timeline */}
       <div
         className={`absolute left-2.5 top-1 h-3 w-3 rounded-full border-2 border-background ${
-          primeiro ? "bg-primary" : "bg-muted-foreground/40"
+          primeiro ? "bg-primary animate-pulse" : "bg-muted-foreground/40"
         }`}
       />
 

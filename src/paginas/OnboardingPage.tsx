@@ -1,8 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   Building2,
   User,
-  CreditCard,
   CheckCircle2,
   ArrowLeft,
   ArrowRight,
@@ -11,14 +10,10 @@ import {
 import { cn } from "@/lib/utils";
 import type { EtapaOnboarding, DadosOnboarding } from "@/tipos";
 import { registrarMunicipio } from "@/servicos/tenants";
-import { listarPlanos } from "@/servicos/billing";
-import { formatarMoeda } from "@/servicos/billing";
-import type { Plano } from "@/tipos";
 
 const ETAPAS: { chave: EtapaOnboarding; titulo: string; icone: React.ElementType }[] = [
   { chave: "dados_municipio", titulo: "Município", icone: Building2 },
   { chave: "dados_responsavel", titulo: "Responsável", icone: User },
-  { chave: "escolha_plano", titulo: "Plano", icone: CreditCard },
   { chave: "confirmacao", titulo: "Confirmação", icone: CheckCircle2 },
 ];
 
@@ -37,23 +32,10 @@ export function OnboardingPage() {
     responsavel_email: "",
     responsavel_cargo: "",
     responsavel_senha: "",
-    plano_escolhido: "gratuito",
   });
-  const [planos, setPlanos] = useState<Plano[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
-
-  const carregarPlanos = useCallback(async () => {
-    try {
-      const p = await listarPlanos();
-      setPlanos(p);
-    } catch {
-      /* planos serão mostrados estaticamente como fallback */
-    }
-  }, []);
-
-  useState(() => { carregarPlanos(); });
 
   const atualizarDados = (campo: keyof DadosOnboarding, valor: string) => {
     setDados((prev) => ({ ...prev, [campo]: valor }));
@@ -232,48 +214,8 @@ export function OnboardingPage() {
             </div>
           )}
 
-          {/* Etapa 3: Escolha do Plano */}
+          {/* Etapa 3: Confirmação */}
           {etapaAtual === 2 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Escolha seu Plano</h2>
-              <p className="text-sm text-gray-500">Todos os planos incluem 14 dias de teste gratuito.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {(planos.length > 0
-                  ? planos
-                  : ([
-                      { nome: "gratuito", titulo: "Gratuito", preco_mensal: 0, limite_usuarios: 3, limite_cestas: 5 },
-                      { nome: "basico", titulo: "Básico", preco_mensal: 14900, limite_usuarios: 10, limite_cestas: 30 },
-                      { nome: "profissional", titulo: "Profissional", preco_mensal: 29900, limite_usuarios: 30, limite_cestas: 100 },
-                      { nome: "enterprise", titulo: "Enterprise", preco_mensal: 59900, limite_usuarios: 999, limite_cestas: 999 },
-                    ] as Partial<Plano>[])
-                ).map((p) => (
-                  <button
-                    key={p.nome}
-                    onClick={() => atualizarDados("plano_escolhido", p.nome!)}
-                    className={cn(
-                      "border-2 rounded-xl p-4 text-left transition hover:shadow-md",
-                      dados.plano_escolhido === p.nome
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-200"
-                    )}
-                  >
-                    <div className="font-semibold text-gray-900">{p.titulo}</div>
-                    <div className="text-lg font-bold text-blue-600 mt-1">
-                      {p.preco_mensal === 0 ? "Grátis" : `${formatarMoeda(p.preco_mensal!)}/mês`}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {p.limite_usuarios === 999 ? "Ilimitado" : `Até ${p.limite_usuarios} usuários`}
-                      {" · "}
-                      {p.limite_cestas === 999 ? "Cestas ilimitadas" : `${p.limite_cestas} cestas`}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Etapa 4: Confirmação */}
-          {etapaAtual === 3 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-900">Confirme seus dados</h2>
               <div className="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
@@ -301,9 +243,10 @@ export function OnboardingPage() {
                     <span className="text-gray-900">{dados.responsavel_cargo}</span>
                   </div>
                 )}
-                <div>
-                  <span className="font-medium text-gray-500">Plano:</span>{" "}
-                  <span className="text-gray-900 capitalize">{dados.plano_escolhido}</span>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-gray-400">
+                    Após o cadastro, um administrador entrará em contato para formalizar o contrato.
+                  </p>
                 </div>
               </div>
               {erro && (

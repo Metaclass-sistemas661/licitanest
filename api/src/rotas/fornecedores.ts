@@ -2,8 +2,9 @@ import type { FastifyInstance } from "fastify";
 import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
-import { tratarErro } from "../utils/erros.js";
+import { tratarErro, AppError } from "../utils/erros.js";
 import { parsePaginacao, respostaPaginada } from "../utils/paginacao.js";
+import { validarCNPJ, validarCPF } from "../utils/validacao.js";
 
 export async function rotasFornecedores(app: FastifyInstance) {
   app.addHook("preHandler", verificarAuth);
@@ -56,12 +57,24 @@ export async function rotasFornecedores(app: FastifyInstance) {
       const b = req.body as {
         razao_social: string; nome_fantasia?: string; cnpj_cpf: string;
         email?: string; telefone?: string; endereco?: string;
-        cidade?: string; uf?: string; cep?: string; municipio_id: string;
+        cidade?: string; uf?: string; cep?: string;
       };
+      // Validar CPF ou CNPJ
+      const doc = b.cnpj_cpf?.replace(/\D/g, "") ?? "";
+      if (doc.length === 11 && !validarCPF(doc)) {
+        throw new AppError("CPF inválido", 400);
+      }
+      if (doc.length === 14 && !validarCNPJ(doc)) {
+        throw new AppError("CNPJ inválido", 400);
+      }
+      if (doc.length !== 11 && doc.length !== 14) {
+        throw new AppError("CPF/CNPJ deve ter 11 ou 14 dígitos", 400);
+      }
+      const municipioId = req.usuario!.servidor!.municipio_id;
       const { rows } = await getPool().query(
         `INSERT INTO fornecedores (razao_social, nome_fantasia, cnpj_cpf, email, telefone, endereco, cidade, uf, cep, municipio_id)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-        [b.razao_social, b.nome_fantasia, b.cnpj_cpf, b.email, b.telefone, b.endereco, b.cidade, b.uf, b.cep, b.municipio_id],
+        [b.razao_social, b.nome_fantasia, b.cnpj_cpf, b.email, b.telefone, b.endereco, b.cidade, b.uf, b.cep, municipioId],
       );
       reply.status(201).send({ data: rows[0] });
     } catch (e) { tratarErro(e, reply); }
@@ -72,6 +85,19 @@ export async function rotasFornecedores(app: FastifyInstance) {
     try {
       const { id } = req.params as { id: string };
       const body = req.body as Record<string, unknown>;
+      // Validar CPF/CNPJ se informado
+      if (body.cnpj_cpf !== undefined) {
+        const doc = String(body.cnpj_cpf).replace(/\D/g, "");
+        if (doc.length === 11 && !validarCPF(doc)) {
+          throw new AppError("CPF inválido", 400);
+        }
+        if (doc.length === 14 && !validarCNPJ(doc)) {
+          throw new AppError("CNPJ inválido", 400);
+        }
+        if (doc.length !== 11 && doc.length !== 14) {
+          throw new AppError("CPF/CNPJ deve ter 11 ou 14 dígitos", 400);
+        }
+      }
       const campos = ["razao_social", "nome_fantasia", "cnpj_cpf", "email", "telefone", "endereco", "cidade", "uf", "cep"];
       const sets: string[] = [];
       const params: unknown[] = [];

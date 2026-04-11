@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
-import { tratarErro } from "../utils/erros.js";
+import { tratarErro, AppError } from "../utils/erros.js";
 import { obterSecret } from "../config/secrets.js";
 
 export async function rotasNotificacoes(app: FastifyInstance) {
@@ -12,14 +12,19 @@ export async function rotasNotificacoes(app: FastifyInstance) {
   // POST /api/notificacoes/registrar
   app.post("/api/notificacoes/registrar", async (req, reply) => {
     try {
-      const { token, plataforma } = req.body as { token: string; plataforma?: string };
-      const userId = req.usuario!.servidor!.id;
+      const { token_fcm, plataforma } = req.body as { token_fcm: string; plataforma?: string };
+      if (!token_fcm || typeof token_fcm !== "string") {
+        return reply.status(400).send({ error: "token_fcm é obrigatório" });
+      }
 
       await getPool().query(
-        `INSERT INTO dispositivos_fcm (user_id, token, plataforma)
-         VALUES ((SELECT id FROM usuarios WHERE firebase_uid = $1), $2, $3)
-         ON CONFLICT (token) DO UPDATE SET atualizado_em = NOW()`,
-        [req.usuario!.uid, token, plataforma ?? "web"],
+        `INSERT INTO dispositivos_fcm (user_id, municipio_id, token_fcm, plataforma)
+         VALUES (
+           (SELECT id FROM usuarios WHERE firebase_uid = $1),
+           $2, $3, $4
+         )
+         ON CONFLICT (token_fcm) DO UPDATE SET atualizado_em = NOW(), ativo = TRUE`,
+        [req.usuario!.uid, req.usuario!.servidor!.municipio_id, token_fcm, plataforma ?? "web"],
       );
       reply.send({ ok: true });
     } catch (e) { tratarErro(e, reply); }
@@ -28,11 +33,40 @@ export async function rotasNotificacoes(app: FastifyInstance) {
   // DELETE /api/notificacoes/token
   app.delete("/api/notificacoes/token", async (req, reply) => {
     try {
-      const { token } = req.body as { token: string };
-      await getPool().query(`DELETE FROM dispositivos_fcm WHERE token = $1`, [token]);
+      const { token_fcm } = req.body as { token_fcm: string };
+      await getPool().query(
+        `UPDATE dispositivos_fcm SET ativo = FALSE WHERE token_fcm = $1`, [token_fcm],
+      );
       reply.status(204).send();
     } catch (e) { tratarErro(e, reply); }
   });
+}
+
+const MAX_DESTINATARIOS_POR_ENVIO = 10;
+const MAX_EMAILS_DIARIOS = 50;
+
+// Quota diária em memória por servidor (reset diário)
+const quotaDiaria = new Map<string, { count: number; data: string }>();
+
+function verificarQuotaEmail(servidorId: string): { permitido: boolean; restante: number } {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const entry = quotaDiaria.get(servidorId);
+  if (!entry || entry.data !== hoje) {
+    quotaDiaria.set(servidorId, { count: 0, data: hoje });
+    return { permitido: true, restante: MAX_EMAILS_DIARIOS };
+  }
+  const restante = MAX_EMAILS_DIARIOS - entry.count;
+  return { permitido: restante > 0, restante };
+}
+
+function incrementarQuotaEmail(servidorId: string, quantidade: number) {
+  const hoje = new Date().toISOString().slice(0, 10);
+  const entry = quotaDiaria.get(servidorId);
+  if (!entry || entry.data !== hoje) {
+    quotaDiaria.set(servidorId, { count: quantidade, data: hoje });
+  } else {
+    entry.count += quantidade;
+  }
 }
 
 export async function rotasEmail(app: FastifyInstance) {
@@ -46,6 +80,29 @@ export async function rotasEmail(app: FastifyInstance) {
         para: string[]; assunto: string; html: string; criado_por?: string;
         de?: string;
       };
+
+      // Validar limite de destinatários por envio
+      if (!Array.isArray(b.para) || b.para.length === 0) {
+        throw new AppError("Lista de destinatários é obrigatória", 400);
+      }
+      if (b.para.length > MAX_DESTINATARIOS_POR_ENVIO) {
+        throw new AppError(`Máximo de ${MAX_DESTINATARIOS_POR_ENVIO} destinatários por envio`, 400);
+      }
+
+      // Verificar quota diária
+      const servidorId = req.usuario!.servidor!.id;
+      const quota = verificarQuotaEmail(servidorId);
+      if (!quota.permitido) {
+        reply.header("Retry-After", "86400");
+        return reply.status(429).send({
+          error: `Quota diária de ${MAX_EMAILS_DIARIOS} emails atingida. Tente novamente amanhã.`,
+        });
+      }
+      if (b.para.length > quota.restante) {
+        return reply.status(429).send({
+          error: `Quota diária insuficiente. Restam ${quota.restante} emails hoje.`,
+        });
+      }
 
       const pool = getPool();
 
@@ -80,6 +137,7 @@ export async function rotasEmail(app: FastifyInstance) {
           `UPDATE emails_enviados SET status = 'enviado', resend_id = $1, enviado_em = NOW() WHERE id = $2`,
           [data.id, email.id],
         );
+        incrementarQuotaEmail(servidorId, b.para.length);
         reply.status(201).send({ data: { ...email, status: "enviado", resend_id: data.id } });
       } else {
         const errText = await resp.text();

@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { tratarErro } from "../utils/erros.js";
+import { registrarAuditoria } from "../utils/audit-dlq.js";
 import { parsePaginacao, respostaPaginada } from "../utils/paginacao.js";
 
 export async function rotasAuditoria(app: FastifyInstance) {
@@ -14,15 +15,18 @@ export async function rotasAuditoria(app: FastifyInstance) {
         servidor_id: string; acao: string; tabela: string;
         registro_id?: string; dados_anteriores?: unknown; dados_novos?: unknown;
       };
-      const { rows } = await getPool().query(
-        `INSERT INTO audit_log (servidor_id, acao, tabela, registro_id, dados_anteriores, dados_novos, ip_address, user_agent)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-        [b.servidor_id, b.acao, b.tabela, b.registro_id,
-         b.dados_anteriores ? JSON.stringify(b.dados_anteriores) : null,
-         b.dados_novos ? JSON.stringify(b.dados_novos) : null,
-         req.ip, req.headers["user-agent"]],
-      );
-      reply.status(201).send({ data: rows[0] });
+      await registrarAuditoria({
+        servidor_id: b.servidor_id,
+        municipio_id: req.usuario?.servidor?.municipio_id ?? null,
+        acao: b.acao,
+        tabela: b.tabela,
+        registro_id: b.registro_id,
+        dados_anteriores: b.dados_anteriores,
+        dados_novos: b.dados_novos,
+        ip_address: req.ip,
+        user_agent: req.headers["user-agent"] ?? null,
+      });
+      reply.status(201).send({ ok: true });
     } catch (e) { tratarErro(e, reply); }
   });
 

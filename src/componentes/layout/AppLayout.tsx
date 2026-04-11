@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -10,7 +10,6 @@ import {
   Settings,
   LogOut,
   Scale,
-  ChevronRight,
   ChevronDown,
   Menu,
   X,
@@ -28,16 +27,24 @@ import {
   FileOutput,
   Sparkles,
   ScanLine,
-  CreditCard,
   BarChart3,
   ShieldCheck,
   BellDot,
   Code2,
+  ClipboardCheck,
+  BookOpen,
+  FileUp,
+  GitBranch,
+  Bot,
+  ShieldAlert,
+  FileSignature,
 } from "lucide-react";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/componentes/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { usePushNotificacoes } from "@/hooks/usePushNotificacoes";
 import { useTheme } from "@/contextos/ThemeContexto";
 import { Breadcrumbs } from "@/componentes/ui/breadcrumbs";
 import { CommandPalette } from "@/componentes/ui/command-palette";
@@ -76,6 +83,7 @@ const navSections: NavSection[] = [
       { to: "/templates-cestas", icon: LayoutTemplate, label: "Templates de Cestas" },
       { to: "/historico-precos", icon: TrendingUp, label: "Histórico de Preços" },
       { to: "/mapa-calor", icon: Map, label: "Mapa de Calor Regional" },
+      { to: "/catmat", icon: BookOpen, label: "CATMAT/CATSER" },
     ],
   },
   {
@@ -86,15 +94,19 @@ const navSections: NavSection[] = [
       { to: "/alertas-preco", icon: BellRing, label: "Alertas de Preço" },
       { to: "/exportacao-sicom", icon: FileOutput, label: "Exportação SICOM" },
       { to: "/ocr-cotacoes", icon: ScanLine, label: "OCR Cotações" },
+      { to: "/checklist-in", icon: ClipboardCheck, label: "Checklist IN 65" },
+      { to: "/workflow", icon: GitBranch, label: "Workflow" },
+      { to: "/lgpd", icon: ShieldAlert, label: "LGPD" },
+      { to: "/importacao-lote", icon: FileUp, label: "Importação em Lote", perfis: ["administrador", "gestor"] },
+      { to: "/contratos", icon: FileSignature, label: "Contratos", perfis: ["administrador"] },
       { to: "/configuracoes", icon: Settings, label: "Configurações", perfis: ["administrador"] },
     ],
   },
   {
     title: "Plataforma",
     items: [
-      { to: "/billing", icon: CreditCard, label: "Assinatura e Billing", perfis: ["administrador"] },
       { to: "/metricas-uso", icon: BarChart3, label: "Métricas de Uso", perfis: ["administrador", "gestor"] },
-      { to: "/admin-metaclass", icon: ShieldCheck, label: "Admin Metaclass", perfis: ["administrador"] },
+      { to: "/superadmin", icon: ShieldCheck, label: "Painel SuperAdmin", perfis: ["administrador"] },
       { to: "/api-publica", icon: Code2, label: "API Pública REST", perfis: ["administrador"] },
     ],
   },
@@ -102,7 +114,8 @@ const navSections: NavSection[] = [
 
 /* ── Itens do sidebar DIREITO (ações rápidas / utilitários) ── */
 const rightSidebarItems: NavItem[] = [
-  { to: "/sugestao-fontes-ia", icon: Sparkles, label: "IA Assistente" },
+  { to: "/sugestao-fontes-ia", icon: Sparkles, label: "IA Sugestões" },
+  { to: "/ia-assistente", icon: Bot, label: "IA Chat" },
   { to: "/ajuda", icon: HelpCircle, label: "Ajuda & FAQ" },
   { to: "/notificacoes", icon: BellDot, label: "Notificações" },
 ];
@@ -148,13 +161,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="mx-4 h-px bg-sidebar-border" />
 
       {/* Navigation — seções colapsáveis com scroll */}
-      <nav data-tour="sidebar-nav" className="flex-1 space-y-1 overflow-y-auto px-3 py-4 scrollbar-thin">
+      <nav data-tour="sidebar-nav" aria-label="Navegação principal" className="flex-1 space-y-1 overflow-y-auto px-3 py-4 scrollbar-thin">
         {secoesFiltradas.map((section) => {
           const isCollapsed = collapsed[section.title] ?? false;
           return (
             <div key={section.title}>
               <button
                 onClick={() => toggleSection(section.title)}
+                aria-expanded={!isCollapsed}
                 className="flex w-full items-center justify-between px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-muted hover:text-sidebar-foreground transition-colors"
               >
                 {section.title}
@@ -179,21 +193,26 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     onClick={onNavigate}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive
                           ? "bg-sidebar-primary/15 text-sidebar-primary-foreground shadow-sm"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:translate-x-0.5",
                       )
                     }
                   >
-                    <item.icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                    <ChevronRight
-                      className={cn(
-                        "ml-auto h-3 w-3 shrink-0 opacity-0 transition-opacity",
-                        "group-[.active]:opacity-100",
-                      )}
-                    />
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <motion.div
+                            layoutId="sidebar-indicator"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-sidebar-primary"
+                            transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                          />
+                        )}
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                      </>
+                    )}
                   </NavLink>
                 ))}
               </div>
@@ -237,7 +256,7 @@ function RightSidebar() {
     : "—";
 
   return (
-    <aside className="hidden w-14 flex-col items-center border-l bg-muted/30 py-4 lg:flex">
+    <aside className="hidden w-14 flex-col items-center border-l bg-muted/30 py-4 lg:flex" aria-label="Ações rápidas">
       {/* Itens de ação rápida */}
       <div className="flex flex-1 flex-col items-center gap-1">
         {rightSidebarItems.map((item) => (
@@ -290,24 +309,35 @@ function RightSidebar() {
 
 export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  usePushNotificacoes();
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {/* Skip to main content — acessibilidade */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg focus:outline-none"
+      >
+        Pular para conteúdo principal
+      </a>
+
       {/* Sidebar Esquerdo — Desktop */}
-      <aside className="hidden w-64 flex-col bg-sidebar-background lg:flex">
+      <aside className="hidden w-64 flex-col bg-sidebar-background lg:flex" aria-label="Menu lateral">
         <SidebarContent />
       </aside>
 
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar Mobile (drawer) */}
       <aside
+        aria-label="Menu lateral"
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar-background transition-transform duration-300 lg:hidden",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full",
@@ -315,6 +345,7 @@ export function AppLayout() {
       >
         <button
           onClick={() => setMobileMenuOpen(false)}
+          aria-label="Fechar menu de navegação"
           className="absolute right-3 top-4 rounded-lg p-1.5 text-sidebar-foreground hover:bg-sidebar-accent"
         >
           <X className="h-5 w-5" />
@@ -325,13 +356,14 @@ export function AppLayout() {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex h-16 items-center justify-between border-b px-6">
+        <header className="flex h-16 items-center justify-between border-b px-6" aria-label="Barra superior">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               className="lg:hidden"
               onClick={() => setMobileMenuOpen(true)}
+              aria-label="Abrir menu de navegação"
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -343,6 +375,7 @@ export function AppLayout() {
             {/* Busca global — Cmd/Ctrl+K trigger */}
             <button
               data-tour="search-bar"
+              aria-label="Abrir busca global (Ctrl+K)"
               onClick={() => {
                 // Disparar evento de teclado simulado para abrir command palette
                 document.dispatchEvent(
@@ -368,9 +401,19 @@ export function AppLayout() {
         </header>
 
         {/* Page content */}
-        <main data-tour="main-content" className="flex-1 overflow-y-auto p-6">
+        <main id="main-content" data-tour="main-content" className="flex-1 overflow-y-auto p-6" aria-label="Conteúdo principal">
           <Breadcrumbs />
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
@@ -395,7 +438,7 @@ function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(next)}
-      title={`Tema: ${label}`}
+      aria-label={`Alterar tema. Atual: ${label}`}
       className="relative h-8 w-8"
     >
       <Icon className="h-4 w-4" />

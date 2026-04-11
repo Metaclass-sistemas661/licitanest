@@ -15,13 +15,14 @@ describe("iaGenerativa — Segurança", () => {
     vi.resetModules();
   });
 
-  it("NÃO expõe VITE_OPENAI_API_KEY no código", async () => {
+  it("NÃO expõe chaves de API no código frontend", async () => {
     const fs = await import("fs");
     const path = await import("path");
     const filePath = path.resolve(__dirname, "../servicos/iaGenerativa.ts");
     const source = fs.readFileSync(filePath, "utf-8");
     expect(source).not.toContain("VITE_OPENAI_API_KEY");
     expect(source).not.toContain("VITE_ANTHROPIC_API_KEY");
+    expect(source).not.toContain("VITE_VERTEX_API_KEY");
   });
 
   it("isIAConfigurada retorna true (Edge Function decide)", async () => {

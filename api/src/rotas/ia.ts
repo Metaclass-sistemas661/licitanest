@@ -2,20 +2,83 @@ import type { FastifyInstance } from "fastify";
 import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
-import { tratarErro } from "../utils/erros.js";
-import { obterSecret } from "../config/secrets.js";
+import { tratarErro, AppError } from "../utils/erros.js";
+import { VertexAI, HarmCategory, HarmBlockThreshold } from "@google-cloud/vertexai";
+import { validarBody, validarParams, idParamsSchema, completarIASchema, avaliarIASchema } from "../middleware/validacao.js";
+
+// ── Vertex AI (Gemini) — única IA permitida ──────────────
+const PROJECT_ID = process.env.GCP_PROJECT_ID || process.env.GCP_PROJECT || "sistema-de-gestao-16e15";
+const LOCATION = process.env.VERTEX_LOCATION || "us-central1";
+const MODELO_GEMINI = process.env.VERTEX_MODEL || "gemini-2.0-flash";
+
+const vertexAI = new VertexAI({ project: PROJECT_ID, location: LOCATION });
+const model = vertexAI.getGenerativeModel({
+  model: MODELO_GEMINI,
+  generationConfig: {
+    maxOutputTokens: 2048,
+    temperature: 0.3,
+    topP: 0.8,
+  },
+  safetySettings: [
+    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  ],
+});
+
+// ── Rate limit por servidor: máx 20 req/hora ────────────
+const IA_MAX_POR_HORA = 20;
+const IA_PROMPT_MAX_CHARS = 4000;
+const iaRateMap = new Map<string, { count: number; windowStart: number }>();
+
+function verificarRateLimitIA(servidorId: string): void {
+  const agora = Date.now();
+  const entry = iaRateMap.get(servidorId);
+
+  if (!entry || agora - entry.windowStart > 3600_000) {
+    iaRateMap.set(servidorId, { count: 1, windowStart: agora });
+    return;
+  }
+
+  if (entry.count >= IA_MAX_POR_HORA) {
+    const minutosRestantes = Math.ceil((3600_000 - (agora - entry.windowStart)) / 60_000);
+    throw new AppError(
+      `Limite de ${IA_MAX_POR_HORA} consultas IA por hora atingido. Aguarde ${minutosRestantes} minutos.`,
+      429,
+    );
+  }
+
+  entry.count++;
+}
 
 export async function rotasIA(app: FastifyInstance) {
   app.addHook("preHandler", verificarAuth);
   app.addHook("preHandler", exigirServidor);
 
   // POST /api/ia/completar
-  app.post("/api/ia/completar", async (req, reply) => {
+  app.post("/api/ia/completar", { preHandler: validarBody(completarIASchema) }, async (req, reply) => {
     try {
       const b = req.body as {
         tipo: string; prompt: string; servidor_id: string;
-        dados_contexto?: unknown; modelo?: string;
+        dados_contexto?: unknown;
       };
+
+      // Validar que o servidor_id pertence ao usuário autenticado
+      if (b.servidor_id !== req.usuario!.servidor!.id) {
+        return reply.status(403).send({ error: "Sem permissão para usar IA como outro servidor" });
+      }
+
+      // Rate limit por servidor
+      verificarRateLimitIA(b.servidor_id);
+
+      // Limitar tamanho do prompt (proteção contra bill shock)
+      if (!b.prompt || typeof b.prompt !== "string" || b.prompt.trim().length === 0) {
+        throw new AppError("Prompt é obrigatório", 400);
+      }
+      if (b.prompt.length > IA_PROMPT_MAX_CHARS) {
+        throw new AppError(`Prompt excede o limite de ${IA_PROMPT_MAX_CHARS} caracteres (enviado: ${b.prompt.length})`, 400);
+      }
 
       const pool = getPool();
 
@@ -27,83 +90,46 @@ export async function rotasIA(app: FastifyInstance) {
       );
       const interacao = rows[0];
 
-      // Montar system prompt contextual para licitações
+      // System prompt contextual para licitações
       const systemPrompt = `Você é um assistente especializado em licitações públicas brasileiras, 
 formação de cestas de preços e pesquisa de mercado conforme a Lei 14.133/2021 (Nova Lei de Licitações).
 Responda de forma técnica, citando artigos de lei quando relevante.
 Tipo de consulta: ${b.tipo}`;
 
-      // Tentar Anthropic primeiro, fallback para OpenAI
       let resposta: string | null = null;
-      let modeloUsado = "";
+      const modeloUsado = MODELO_GEMINI;
 
       try {
-        const anthropicKey = await obterSecret("ANTHROPIC_API_KEY");
-        if (anthropicKey) {
-          const resp = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": anthropicKey,
-              "anthropic-version": "2023-06-01",
-            },
-            body: JSON.stringify({
-              model: b.modelo || "claude-sonnet-4-20250514",
-              max_tokens: 2048,
-              system: systemPrompt,
-              messages: [{ role: "user", content: b.prompt }],
-            }),
-            signal: AbortSignal.timeout(30000),
-          });
+        const result = await model.generateContent({
+          systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
+          contents: [{ role: "user", parts: [{ text: b.prompt }] }],
+        });
 
-          if (resp.ok) {
-            const data = (await resp.json()) as { content: { text: string }[] };
-            resposta = data.content?.[0]?.text ?? null;
-            modeloUsado = b.modelo || "claude-sonnet-4-20250514";
-          }
-        }
+        const candidate = result.response?.candidates?.[0];
+        resposta = candidate?.content?.parts?.[0]?.text ?? null;
       } catch (err) {
-        console.warn("[IA] Anthropic indisponível, tentando OpenAI:", err);
+        console.error("[IA] Vertex AI erro:", err);
       }
 
-      // Fallback OpenAI
+      // Registrar tentativa bloqueada no audit_log se falhou
       if (!resposta) {
-        try {
-          const openaiKey = await obterSecret("OPENAI_API_KEY");
-          if (openaiKey) {
-            const resp = await fetch("https://api.openai.com/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${openaiKey}`,
-              },
-              body: JSON.stringify({
-                model: "gpt-4o-mini",
-                max_tokens: 2048,
-                messages: [
-                  { role: "system", content: systemPrompt },
-                  { role: "user", content: b.prompt },
-                ],
-              }),
-              signal: AbortSignal.timeout(30000),
-            });
-
-            if (resp.ok) {
-              const data = (await resp.json()) as { choices: { message: { content: string } }[] };
-              resposta = data.choices?.[0]?.message?.content ?? null;
-              modeloUsado = "gpt-4o-mini";
-            }
-          }
-        } catch (err) {
-          console.warn("[IA] OpenAI também indisponível:", err);
-        }
+        await pool.query(
+          `INSERT INTO audit_log (tabela, acao, registro_id, dados_novos, ip_address, user_agent)
+           VALUES ('interacoes_ia', 'IA_ERRO', $1, $2, $3, $4)`,
+          [
+            interacao.id,
+            JSON.stringify({ modelo: modeloUsado, tipo: b.tipo }),
+            (req.headers["x-forwarded-for"] as string) ?? req.ip,
+            req.headers["user-agent"] ?? "",
+          ],
+        );
       }
 
       // Atualizar interação com resposta
       await pool.query(
         `UPDATE interacoes_ia SET resposta = $1, status = $2, modelo = $3, respondido_em = NOW()
          WHERE id = $4`,
-        [resposta, resposta ? "concluido" : "erro", modeloUsado || null, interacao.id],
+        [resposta, resposta ? "concluido" : "erro", modeloUsado, interacao.id],
       );
 
       reply.send({
@@ -131,7 +157,7 @@ Tipo de consulta: ${b.tipo}`;
   });
 
   // PUT /api/ia/interacoes/:id/avaliar
-  app.put("/api/ia/interacoes/:id/avaliar", async (req, reply) => {
+    app.put("/api/ia/interacoes/:id/avaliar", { preHandler: [validarParams(idParamsSchema), validarBody(avaliarIASchema)] }, async (req, reply) => {
     try {
       const { id } = req.params as { id: string };
       const { nota } = req.body as { nota: number };

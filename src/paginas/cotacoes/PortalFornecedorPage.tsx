@@ -132,6 +132,7 @@ export function PortalFornecedorPage() {
         nome_responsavel: dadosForn.nome_responsavel || undefined,
         cpf_responsavel: dadosForn.cpf_responsavel || undefined,
       },
+      dados.csrf_token,
     );
   };
 

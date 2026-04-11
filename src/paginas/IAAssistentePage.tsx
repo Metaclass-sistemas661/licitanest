@@ -148,7 +148,7 @@ export function IAAssistentePage() {
                 IA em modo demonstração
               </p>
               <p className="text-sm text-amber-700">
-                Configure OPENAI_API_KEY ou ANTHROPIC_API_KEY nas variáveis de ambiente do servidor (Edge Function ia-proxy) para ativar a IA
+                Configure as credenciais do Vertex AI (Google Cloud) no servidor para ativar a IA generativa
               </p>
             </div>
           </CardContent>

@@ -42,6 +42,8 @@ export interface AuthContextoValor {
   redefinirSenha: (novaSenha: string, oobCode: string) => Promise<{ erro: string | null }>;
   /** Verifica se o perfil do usuário está na lista permitida */
   temPermissao: (...perfis: PerfilNome[]) => boolean;
+  /** Indica se o servidor logado é SuperAdmin da plataforma */
+  isSuperAdmin: boolean;
 }
 
 // ─── Contexto ──────────────────────────────────────────────
@@ -164,12 +166,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (servidor.perfil as unknown as { nome: PerfilNome }).nome;
   }, [servidor]);
 
+  const isSuperAdmin = useMemo(() => !!servidor?.is_superadmin, [servidor]);
+
   const temPermissao = useCallback(
     (...perfis: PerfilNome[]) => {
+      if (isSuperAdmin) return true;
       if (!perfil) return false;
       return perfis.includes(perfil);
     },
-    [perfil],
+    [perfil, isSuperAdmin],
   );
 
   // ── Valor do contexto ────────────────────────────────────
@@ -184,8 +189,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       recuperarSenha,
       redefinirSenha,
       temPermissao,
+      isSuperAdmin,
     }),
-    [usuario, servidor, perfil, carregando, login, logout, recuperarSenha, redefinirSenha, temPermissao],
+    [usuario, servidor, perfil, carregando, login, logout, recuperarSenha, redefinirSenha, temPermissao, isSuperAdmin],
   );
 
   return (

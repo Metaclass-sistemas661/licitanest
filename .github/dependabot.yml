@@ -1,0 +1,57 @@
+version: 2
+updates:
+  # Frontend (raiz)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "andre"
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      production-deps:
+        dependency-type: "production"
+      dev-deps:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+
+  # API
+  - package-ecosystem: "npm"
+    directory: "/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "api"
+
+  # Cloud Functions — asaas-webhook
+  - package-ecosystem: "npm"
+    directory: "/cloud-functions/asaas-webhook"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "cloud-functions"
+
+  # Cloud Functions — atualizar-indices
+  - package-ecosystem: "npm"
+    directory: "/cloud-functions/atualizar-indices"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "cloud-functions"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"

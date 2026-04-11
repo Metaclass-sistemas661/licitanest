@@ -18,6 +18,28 @@ export {
   useBuscaCMED,
 } from "./useFontesPrecoFase6";
 export {
+  useBuscaComprasNet,
+  useBuscaCATMAT,
+  useBuscaARP,
+  useBuscaANP,
+  useBuscaFNDE,
+} from "./useFontesPrecoFase7";
+export {
+  useBuscaBPSSaude,
+  useBuscaSIGTAP,
+  useBuscaCEASANacional,
+  useBuscaFIPE,
+  useBuscaSIASG,
+  useBuscaTCUPrecos,
+} from "./useFontesPrecoFase7P1";
+export {
+  useBuscaCUB,
+  useBuscaBNDES,
+  useBuscaSIASIH,
+  useBuscaAgenciasReg,
+  useBuscaINCRA,
+} from "./useFontesPrecoFase7P2";
+export {
   useIndicesCorrecao,
   useImportacaoIndices,
   useCorrecaoCesta,

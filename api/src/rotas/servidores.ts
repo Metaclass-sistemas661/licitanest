@@ -3,6 +3,7 @@ import { getPool } from "../config/database.js";
 import { verificarAuth } from "../middleware/auth.js";
 import { exigirServidor } from "../middleware/autorizacao.js";
 import { tratarErro } from "../utils/erros.js";
+import { cacheGet, cacheSet, cacheInvalidar, CACHE_TTL, CACHE_KEY } from "../config/cache.js";
 
 export async function rotasServidores(app: FastifyInstance) {
   app.addHook("preHandler", verificarAuth);
@@ -15,7 +16,9 @@ export async function rotasServidores(app: FastifyInstance) {
       if (!servidor) return reply.status(404).send({ error: "Servidor não encontrado" });
       // Buscar com joins completos
       const { rows } = await getPool().query(
-        `SELECT s.*,
+        `SELECT s.id, s.nome, s.email, s.cpf, s.telefone, s.cargo,
+                s.perfil_id, s.secretaria_id, s.user_id, s.data_nascimento,
+                s.criado_em, s.atualizado_em, s.is_superadmin,
                 json_build_object('id', p.id, 'nome', p.nome, 'descricao', p.descricao, 'permissoes', p.permissoes) AS perfil,
                 json_build_object('id', sec.id, 'nome', sec.nome, 'sigla', sec.sigla, 'municipio_id', sec.municipio_id, 'ativo', sec.ativo) AS secretaria
          FROM servidores s
@@ -24,7 +27,12 @@ export async function rotasServidores(app: FastifyInstance) {
          WHERE s.id = $1`,
         [servidor.id],
       );
-      reply.send({ data: rows[0] });
+      const data = rows[0];
+      // Não retornar is_superadmin para não-superadmins
+      if (data && !data.is_superadmin) {
+        delete data.is_superadmin;
+      }
+      reply.send({ data });
     } catch (e) { tratarErro(e, reply); }
   });
 
@@ -132,7 +140,10 @@ export async function rotasServidores(app: FastifyInstance) {
   // GET /api/perfis
   app.get("/api/perfis", async (_req, reply) => {
     try {
+      const cached = await cacheGet(CACHE_KEY.PERFIS);
+      if (cached) return reply.send({ data: cached });
       const { rows } = await getPool().query(`SELECT * FROM perfis ORDER BY nome`);
+      await cacheSet(CACHE_KEY.PERFIS, rows, CACHE_TTL.PERFIS);
       reply.send({ data: rows });
     } catch (e) { tratarErro(e, reply); }
   });

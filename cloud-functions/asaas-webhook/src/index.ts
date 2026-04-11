@@ -86,10 +86,18 @@ async function processarPagamentoConfirmado(db: Pool, payload: AsaasPayload): Pr
   const municipioId = p.externalReference;
   if (!municipioId) return;
 
-  // Atualizar fatura como paga
+  // Atualizar fatura como paga — match por asaas_payment_id (único) ao invés de valor
   await db.query(
-    `UPDATE faturas SET status = 'pago', pago_em = $1, asaas_payment_id = $2, atualizado_em = NOW()
-     WHERE municipio_id = $3 AND status = 'pendente' AND valor = $4
+    `UPDATE faturas SET status = 'paga', pago_em = $1, atualizado_em = NOW()
+     WHERE municipio_id = $2 AND asaas_payment_id = $3 AND status = 'pendente'`,
+    [p.paymentDate ?? new Date().toISOString(), municipioId, p.id],
+  );
+
+  // Fallback: se fatura não tinha asaas_payment_id — vincular pela mais recente pendente
+  await db.query(
+    `UPDATE faturas SET status = 'paga', pago_em = $1, asaas_payment_id = $2, atualizado_em = NOW()
+     WHERE municipio_id = $3 AND status = 'pendente' AND asaas_payment_id IS NULL AND valor = $4
+     AND NOT EXISTS (SELECT 1 FROM faturas f2 WHERE f2.asaas_payment_id = $2)
      ORDER BY criado_em DESC LIMIT 1`,
     [p.paymentDate ?? new Date().toISOString(), p.id, municipioId, p.value],
   );
@@ -108,14 +116,14 @@ async function processarPagamentoVencido(db: Pool, payload: AsaasPayload): Promi
   if (!municipioId) return;
 
   await db.query(
-    `UPDATE faturas SET status = 'vencido', atualizado_em = NOW()
+    `UPDATE faturas SET status = 'vencida', atualizado_em = NOW()
      WHERE municipio_id = $1 AND asaas_payment_id = $2`,
     [municipioId, p.id],
   );
 
   // Verificar se tem mais de 1 fatura vencida → suspender
   const { rows } = await db.query(
-    `SELECT COUNT(*) AS total FROM faturas WHERE municipio_id = $1 AND status = 'vencido'`,
+    `SELECT COUNT(*) AS total FROM faturas WHERE municipio_id = $1 AND status = 'vencida'`,
     [municipioId],
   );
   if (parseInt(rows[0].total) >= 2) {
@@ -132,7 +140,7 @@ async function processarPagamentoEstornado(db: Pool, payload: AsaasPayload): Pro
   if (!municipioId) return;
 
   await db.query(
-    `UPDATE faturas SET status = 'estornado', atualizado_em = NOW()
+    `UPDATE faturas SET status = 'estornada', atualizado_em = NOW()
      WHERE municipio_id = $1 AND asaas_payment_id = $2`,
     [municipioId, p.id],
   );
@@ -144,7 +152,7 @@ async function processarPagamentoDeletado(db: Pool, payload: AsaasPayload): Prom
   if (!municipioId) return;
 
   await db.query(
-    `UPDATE faturas SET status = 'cancelado', atualizado_em = NOW()
+    `UPDATE faturas SET status = 'cancelada', atualizado_em = NOW()
      WHERE municipio_id = $1 AND asaas_payment_id = $2`,
     [municipioId, p.id],
   );
@@ -176,11 +184,30 @@ ff.http("asaasWebhook", async (req, res) => {
 
     const db = await getPool();
 
-    // Gravar evento bruto na auditoria
-    await db.query(
-      `INSERT INTO billing_eventos (tipo, dados) VALUES ($1, $2)`,
-      [payload.event, JSON.stringify(payload)],
+    // Idempotência: gerar event_id único para deduplicação
+    const eventId = payload.payment?.id
+      ? `${payload.event}:${payload.payment.id}`
+      : payload.subscription?.id
+        ? `${payload.event}:${payload.subscription.id}`
+        : `${payload.event}:${Date.now()}`;
+    const municipioId = payload.payment?.externalReference
+      ?? payload.subscription?.externalReference
+      ?? null;
+
+    // Gravar evento bruto — com deduplicação via asaas_event_id
+    const { rowCount } = await db.query(
+      `INSERT INTO billing_eventos (municipio_id, tipo, payload, asaas_event_id)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (asaas_event_id) DO NOTHING`,
+      [municipioId, payload.event, JSON.stringify(payload), eventId],
     );
+
+    // Se rowCount = 0, evento já foi processado (idempotente)
+    if (rowCount === 0) {
+      console.info(`[webhook] Evento duplicado ignorado: ${eventId}`);
+      res.status(200).json({ ok: true, event: payload.event, duplicated: true });
+      return;
+    }
 
     // Processar por tipo de evento
     switch (payload.event) {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/componentes/ui/button";
 import { Input } from "@/componentes/ui/input";
 import { Scale, Loader2, AlertCircle, Eye, EyeOff, Shield, ArrowLeft } from "lucide-react";
@@ -7,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { loginSchema, validarComZod } from "@/lib/validacao";
 import { verificar2FAAtivo, obterSegredo2FA, verificarTOTP } from "@/servicos/totp";
 import { verificarRateLimitLogin } from "@/lib/rateLimiter";
+import { fadeInDown, staggerContainer, staggerItem } from "@/lib/animations";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -110,8 +112,14 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#1e3a8a] p-4 sm:p-6">
-      <div className="flex w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl" style={{ minHeight: 'calc(100vh - 3rem)' }}>
+    <div className="flex min-h-screen items-center justify-center bg-[#1e3a8a] p-4 sm:p-6 animate-gradient" style={{ backgroundSize: "200% 200%", backgroundImage: "linear-gradient(135deg, #1e3a8a, #3b0764, #0f172a, #1e3a8a)" }}>
+      <motion.div
+        className="flex w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+        style={{ minHeight: 'calc(100vh - 3rem)' }}
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
         {/* ── Lado Esquerdo: Formulário ─────────────────── */}
         <div className="relative flex w-full flex-col justify-center px-8 py-10 sm:px-12 md:w-1/2">
           {/* Botão Voltar */}
@@ -126,7 +134,12 @@ export function LoginPage() {
 
           <div className="mx-auto w-full max-w-sm">
             {/* Logo */}
-            <div className="mb-6 flex flex-col items-center">
+            <motion.div
+              className="mb-6 flex flex-col items-center"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#1e3a8a]/10">
                 <Scale className="h-6 w-6 text-[#1e3a8a]" />
               </div>
@@ -134,14 +147,19 @@ export function LoginPage() {
               <p className="mt-1 text-center text-sm text-gray-500">
                 Sistema de Cestas de Preços para Compras Públicas
               </p>
-            </div>
+            </motion.div>
 
             {etapa2FA ? (
               /* ── Etapa 2FA ──────────────────────────────── */
               <form onSubmit={handleVerificar2FA} className="space-y-4">
                 {erro && (
-                  <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
+                  <div
+                    role="alert"
+                    aria-live="assertive"
+                    aria-atomic="true"
+                    className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600"
+                  >
+                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>{erro}</span>
                   </div>
                 )}
@@ -197,17 +215,35 @@ export function LoginPage() {
               </form>
             ) : (
               /* ── Etapa Login Normal ─────────────────────── */
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <motion.form
+                onSubmit={handleSubmit}
+                className="space-y-4"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
                 {/* Erro */}
+                <AnimatePresence>
                 {erro && (
-                  <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
+                  <motion.div
+                    variants={fadeInDown}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.2 }}
+                    role="alert"
+                    aria-live="assertive"
+                    aria-atomic="true"
+                    className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600 animate-shake"
+                  >
+                    <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>{erro}</span>
-                  </div>
+                  </motion.div>
                 )}
+                </AnimatePresence>
 
                 {/* E-mail */}
-                <div className="space-y-2">
+                <motion.div variants={staggerItem} className="space-y-2">
                   <label className="text-sm font-medium text-gray-700" htmlFor="email">
                     E-mail
                   </label>
@@ -221,10 +257,10 @@ export function LoginPage() {
                     disabled={carregando}
                     autoFocus
                   />
-                </div>
+                </motion.div>
 
                 {/* Senha */}
-                <div className="space-y-2">
+                <motion.div variants={staggerItem} className="space-y-2">
                   <label className="text-sm font-medium text-gray-700" htmlFor="senha">
                     Senha
                   </label>
@@ -244,6 +280,7 @@ export function LoginPage() {
                       onClick={() => setMostrarSenha(!mostrarSenha)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       tabIndex={-1}
+                      aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                     >
                       {mostrarSenha ? (
                         <EyeOff className="h-4 w-4" />
@@ -252,19 +289,20 @@ export function LoginPage() {
                       )}
                     </button>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Link recuperar senha */}
-                <div className="text-right">
+                <motion.div variants={staggerItem} className="text-right">
                   <Link
                     to="/recuperar-senha"
                     className="text-sm text-[#1e3a8a] hover:underline"
                   >
                     Esqueci minha senha
                   </Link>
-                </div>
+                </motion.div>
 
                 {/* Botão */}
+                <motion.div variants={staggerItem}>
                 <Button className="w-full bg-[#1e3a8a] hover:bg-[#1e3a8a]/90" type="submit" disabled={carregando}>
                   {carregando ? (
                     <>
@@ -275,11 +313,12 @@ export function LoginPage() {
                     "Entrar"
                   )}
                 </Button>
+                </motion.div>
 
                 <p className="text-center text-xs text-gray-400">
                   Art. 23 da Lei Federal nº 14.133/2021
                 </p>
-              </form>
+              </motion.form>
             )}
           </div>
         </div>
@@ -287,10 +326,22 @@ export function LoginPage() {
         {/* ── Lado Direito: Gradiente Visual ────────────── */}
         <div className="relative hidden w-1/2 overflow-hidden md:block">
           <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#3b0764] to-[#0f172a]" />
-          {/* Orbs decorativos */}
-          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl" />
-          <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 blur-2xl" />
+          {/* Orbs decorativos animados */}
+          <motion.div
+            className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-purple-600/20 blur-3xl"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.35, 0.2] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
+          <motion.div
+            className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 blur-2xl"
+            animate={{ scale: [1, 1.3, 1] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
           {/* Conteúdo central */}
           <div className="relative flex h-full flex-col items-center justify-center p-10 text-center">
             <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
@@ -316,7 +367,7 @@ export function LoginPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

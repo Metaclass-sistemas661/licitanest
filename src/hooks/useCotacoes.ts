@@ -262,12 +262,13 @@ export function usePortalFornecedor() {
       nome_responsavel?: string;
       cpf_responsavel?: string;
     },
+    csrfToken?: string,
   ) => {
     setSalvando(true);
     setErro(null);
     setSucesso(false);
     try {
-      await salvarRespostasPortal(fornecedorId, respostas, dadosFornecedor);
+      await salvarRespostasPortal(fornecedorId, respostas, dadosFornecedor, csrfToken);
       setSucesso(true);
     } catch (e: any) {
       setErro(e.message);

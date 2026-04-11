@@ -3,11 +3,39 @@ import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+import fs from "fs";
+
+// Plugin que substitui placeholders no firebase-messaging-sw.js com env vars reais
+function firebaseSwEnvPlugin() {
+  return {
+    name: "firebase-sw-env",
+    writeBundle(options: { dir?: string }) {
+      const outDir = options.dir || "dist";
+      const swPath = path.resolve(outDir, "firebase-messaging-sw.js");
+      if (!fs.existsSync(swPath)) return;
+
+      let content = fs.readFileSync(swPath, "utf-8");
+      const envMap: Record<string, string> = {
+        VITE_FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY || "",
+        VITE_FIREBASE_AUTH_DOMAIN: process.env.VITE_FIREBASE_AUTH_DOMAIN || "",
+        VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID || "",
+        VITE_FIREBASE_STORAGE_BUCKET: process.env.VITE_FIREBASE_STORAGE_BUCKET || "",
+        VITE_FIREBASE_MESSAGING_SENDER_ID: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
+        VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID || "",
+      };
+      for (const [key, val] of Object.entries(envMap)) {
+        content = content.replace(`"${key}"`, JSON.stringify(val));
+      }
+      fs.writeFileSync(swPath, content);
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    firebaseSwEnvPlugin(),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["vite.svg", "icons/*.svg"],
