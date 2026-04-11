@@ -113,6 +113,9 @@ export default [
         ServiceWorkerRegistration: "readonly",
         BufferSource: "readonly",
         Uint8Array: "readonly",
+        XMLHttpRequest: "readonly",
+        PromiseRejectionEvent: "readonly",
+        Node: "readonly",
         React: "readonly",
       },
     },
@@ -241,6 +244,17 @@ export default [
         process: "readonly",
         module: "readonly",
         require: "readonly",
+      },
+    },
+  },
+
+  // Configuração para load tests (k6)
+  {
+    files: ["loadtest/**/*.js"],
+    languageOptions: {
+      globals: {
+        __ENV: "readonly",
+        console: "readonly",
       },
     },
   },

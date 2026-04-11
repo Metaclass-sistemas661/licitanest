@@ -31,7 +31,7 @@ export async function obterSecret(nome: string): Promise<string> {
     console.error(`[CRITICAL] Secret "${nome}" falhou ao carregar do Secret Manager:`, err);
     // Em produção, NÃO silenciar falhas de secrets — pode causar operação com credenciais vazias
     if (process.env.NODE_ENV === "production") {
-      throw new Error(`Secret "${nome}" indisponível. Servidor não pode operar sem esta credencial.`);
+      throw new Error(`Secret "${nome}" indisponível. Servidor não pode operar sem esta credencial.`, { cause: err });
     }
     console.warn(`[DEV] Secret "${nome}" não encontrado. Usando valor vazio (apenas desenvolvimento).`);
     return "";
