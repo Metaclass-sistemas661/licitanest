@@ -37,9 +37,17 @@ export async function verificarAuth(
   }
 
   const token = header.slice(7);
-  try {
-    const decoded = await getAuth().verifyIdToken(token);
 
+  let decoded: { uid: string; email?: string };
+  try {
+    decoded = await getAuth().verifyIdToken(token);
+  } catch (err) {
+    request.log.warn({ err }, "Token Firebase inválido");
+    reply.status(401).send({ error: "Token inválido" });
+    return;
+  }
+
+  try {
     const { rows } = await getPool().query(
       `SELECT s.id, s.nome, s.cpf, s.data_nascimento, s.perfil_id, p.nome AS perfil_nome, p.permissoes,
               s.secretaria_id, sec.municipio_id, u.nivel_govbr, s.is_superadmin
@@ -66,8 +74,9 @@ export async function verificarAuth(
     } else if (rows[0]?.municipio_id) {
       await getPool().query(`SELECT set_config('app.current_municipio_id', $1, false)`, [rows[0].municipio_id]);
     }
-  } catch {
-    reply.status(401).send({ error: "Token inválido" });
+  } catch (err) {
+    request.log.error({ err }, "Erro ao buscar servidor no banco");
+    reply.status(500).send({ error: "Erro interno ao autenticar" });
   }
 }
 
