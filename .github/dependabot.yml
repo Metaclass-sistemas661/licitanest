@@ -4,54 +4,60 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "andre"
+      interval: "monthly"
+    open-pull-requests-limit: 3
     labels:
       - "dependencies"
-      - "security"
     groups:
-      production-deps:
-        dependency-type: "production"
-      dev-deps:
-        dependency-type: "development"
+      all-deps:
+        patterns: ["*"]
         update-types: ["minor", "patch"]
 
   # API
   - package-ecosystem: "npm"
     directory: "/api"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 3
     labels:
       - "dependencies"
-      - "api"
+    groups:
+      all-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   # Cloud Functions — asaas-webhook
   - package-ecosystem: "npm"
     directory: "/cloud-functions/asaas-webhook"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
     labels:
       - "dependencies"
-      - "cloud-functions"
+    groups:
+      all-deps:
+        patterns: ["*"]
 
   # Cloud Functions — atualizar-indices
   - package-ecosystem: "npm"
     directory: "/cloud-functions/atualizar-indices"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
     labels:
       - "dependencies"
-      - "cloud-functions"
+    groups:
+      all-deps:
+        patterns: ["*"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
     labels:
       - "ci"
+    groups:
+      all-actions:
+        patterns: ["*"]
