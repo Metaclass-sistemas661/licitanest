@@ -21,9 +21,9 @@ jobs:
       matrix:
         dir: [".", "api", "cloud-functions/asaas-webhook", "cloud-functions/atualizar-indices"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "22"
 
@@ -39,7 +39,7 @@ jobs:
         run: cd ${{ matrix.dir }} && npm audit --json > audit-report.json || true
 
       - name: Upload audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: audit-${{ strategy.job-index }}
           path: ${{ matrix.dir }}/audit-report.json
