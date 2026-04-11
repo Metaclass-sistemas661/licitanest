@@ -11,22 +11,43 @@ export async function inicializarRedis(): Promise<void> {
   if (client || conectando) return;
   conectando = true;
 
-  const redisHost = process.env.REDIS_HOST || "127.0.0.1";
+  const redisHost = process.env.REDIS_HOST;
   const redisPort = parseInt(process.env.REDIS_PORT || "6379");
 
+  // Se REDIS_HOST não estiver configurado, cache fica desabilitado (não bloqueia startup)
+  if (!redisHost) {
+    console.warn("[cache] REDIS_HOST não configurado — cache desabilitado");
+    conectando = false;
+    return;
+  }
+
+  let tempClient: RedisClientType | null = null;
   try {
-    client = createClient({
-      socket: { host: redisHost, port: redisPort, connectTimeout: 5000 },
+    tempClient = createClient({
+      socket: {
+        host: redisHost,
+        port: redisPort,
+        connectTimeout: 5000,
+        reconnectStrategy: (retries) => {
+          if (retries > 3) return new Error("Max Redis reconnect attempts reached");
+          return Math.min(retries * 500, 2000);
+        },
+      },
     });
 
-    client.on("error", (err) => {
+    tempClient.on("error", (err) => {
       console.warn("[cache] Erro Redis:", err.message);
     });
 
-    await client.connect();
+    await tempClient.connect();
+    client = tempClient;
     console.info(`[cache] Redis conectado em ${redisHost}:${redisPort}`);
   } catch (err) {
     console.warn("[cache] Redis indisponível — cache desabilitado:", (err as Error).message);
+    // Garantir que o client com retry é destruído para não ficar reconectando em background
+    if (tempClient) {
+      try { await tempClient.disconnect(); } catch { /* ignore */ }
+    }
     client = null;
   } finally {
     conectando = false;
