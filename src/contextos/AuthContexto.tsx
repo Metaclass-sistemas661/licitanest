@@ -13,6 +13,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   confirmPasswordReset,
+  setPersistence,
+  browserSessionPersistence,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { api } from "@/lib/api";
@@ -99,6 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ── Inicializar sessão com Firebase Auth ─────────────────
   useEffect(() => {
+    // Sessão expira ao fechar o browser/aba
+    setPersistence(auth, browserSessionPersistence).catch(() => {});
+
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUsuario(firebaseUser);
       if (firebaseUser) {
