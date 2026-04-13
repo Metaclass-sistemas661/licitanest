@@ -44,7 +44,7 @@ export function AceiteTermosModal() {
   return (
     <Dialog open={pendente} onOpenChange={() => {}}>
       <DialogContent
-        className="sm:max-w-lg [&>button]:hidden"
+        className="sm:max-w-lg max-h-[90vh] overflow-y-auto [&>button]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
