@@ -4,27 +4,19 @@
 // ═══════════════════════════════════════════════════════════════
 import { api } from "@/lib/api";
 
-// ── Configuração Firebase (importação dinâmica) ────────────
+// ── Configuração Firebase (reutiliza app singleton) ────────
+import { firebaseApp } from "@/lib/firebase";
+
 let messaging: import("firebase/messaging").Messaging | null = null;
 
 async function getMessaging() {
   if (messaging) return messaging;
-  const { initializeApp } = await import("firebase/app");
   const { getMessaging: getMsg, isSupported } = await import("firebase/messaging");
 
   const supported = await isSupported();
   if (!supported) return null;
 
-  const app = initializeApp({
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  });
-
-  messaging = getMsg(app);
+  messaging = getMsg(firebaseApp);
   return messaging;
 }
 
