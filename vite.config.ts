@@ -37,7 +37,7 @@ export default defineConfig({
     tailwindcss(),
     firebaseSwEnvPlugin(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       includeAssets: ["vite.svg", "icons/*.svg"],
       manifest: false,           // usamos /public/manifest.json manual
       workbox: {

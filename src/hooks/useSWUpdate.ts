@@ -15,11 +15,11 @@ export function useSWUpdate() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, registration) {
-      // Verificar atualizações a cada 60 minutos
+      // Verificar atualizações a cada 10 minutos
       if (registration) {
         setInterval(() => {
           registration.update();
-        }, 60 * 60 * 1000);
+        }, 10 * 60 * 1000);
       }
       console.info("[SW] Registrado:", swUrl);
     },
