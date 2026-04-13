@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/componentes/ui/dialog";
@@ -44,7 +45,7 @@ export function AceiteTermosModal() {
   return (
     <Dialog open={pendente} onOpenChange={() => {}}>
       <DialogContent
-        className="sm:max-w-lg max-h-[90vh] overflow-y-auto [&>button]:hidden"
+        className="sm:max-w-lg max-h-[90dvh] flex flex-col [&>button]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
@@ -59,7 +60,7 @@ export function AceiteTermosModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 overflow-y-auto flex-1">
           <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50 transition-colors">
             <input
               type="checkbox"
@@ -107,17 +108,19 @@ export function AceiteTermosModal() {
           </label>
         </div>
 
-        <Button
-          onClick={handleAceitar}
-          disabled={!aceitouTermos || !aceitouPrivacidade || enviando}
-          className="w-full"
-        >
-          {enviando ? "Registrando aceite..." : "Aceitar e Continuar"}
-        </Button>
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
+          <Button
+            onClick={handleAceitar}
+            disabled={!aceitouTermos || !aceitouPrivacidade || enviando}
+            className="w-full"
+          >
+            {enviando ? "Registrando aceite..." : "Aceitar e Continuar"}
+          </Button>
 
-        <p className="text-xs text-center text-muted-foreground">
-          Seu aceite será registrado com data, IP e versão do documento conforme LGPD Art. 8.
-        </p>
+          <p className="text-xs text-center text-muted-foreground">
+            Seu aceite será registrado com data, IP e versão do documento conforme LGPD Art. 8.
+          </p>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
