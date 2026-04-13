@@ -15,6 +15,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Emergency: force-update stale service workers that cache broken bundles
+      // This runs before any bundled JS, so it works even when the cached app crashes
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          regs.forEach(function(reg) {
+            reg.update().catch(function() {
+              // SW file fetch failed — unregister the stale worker and reload
+              reg.unregister().then(function() { location.reload(); });
+            });
+          });
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

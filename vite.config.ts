@@ -42,7 +42,7 @@ export default defineConfig({
       manifest: false,           // usamos /public/manifest.json manual
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        globIgnores: ["**/home.html", "**/contato.html", "**/politica-de-privacidade.html", "**/termos-de-uso.html", "**/preferencias-de-cookies.html", "**/canal-lgpd.html"],
+        globIgnores: ["**/home.html", "**/contato.html", "**/politica-de-privacidade.html", "**/termos-de-uso.html", "**/preferencias-de-cookies.html", "**/canal-lgpd.html", "**/clear-cache.html"],
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
@@ -80,7 +80,7 @@ export default defineConfig({
           },
         ],
         navigateFallback: "/app.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/portal\/cotacao/, /^\/$/, /^\/home\.html/, /^\/contato/, /^\/politica/, /^\/termos/, /^\/preferencias/, /^\/canal-lgpd/],
+        navigateFallbackDenylist: [/^\/api/, /^\/portal\/cotacao/, /^\/$/, /^\/home\.html/, /^\/contato/, /^\/politica/, /^\/termos/, /^\/preferencias/, /^\/canal-lgpd/, /^\/clear-cache/],
       },
       devOptions: {
         enabled: false,
