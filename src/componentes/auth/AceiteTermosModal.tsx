@@ -18,6 +18,7 @@ export function AceiteTermosModal() {
   const [aceitouTermos, setAceitouTermos] = useState(false);
   const [aceitouPrivacidade, setAceitouPrivacidade] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
     if (!servidor) return;
@@ -29,12 +30,14 @@ export function AceiteTermosModal() {
   const handleAceitar = useCallback(async () => {
     if (!servidor) return;
     setEnviando(true);
+    setErro(null);
     try {
       await registrarConsentimento(servidor.id, "termos_uso", true);
       await registrarConsentimento(servidor.id, "politica_privacidade", true);
       setPendente(false);
-    } catch {
-      // retry later
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Erro desconhecido";
+      setErro(`Falha ao registrar aceite: ${msg}. Tente limpar o cache em /clear-cache.html`);
     } finally {
       setEnviando(false);
     }
@@ -109,6 +112,11 @@ export function AceiteTermosModal() {
         </div>
 
         <DialogFooter className="flex-col gap-2 sm:flex-col">
+          {erro && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+              {erro}
+            </div>
+          )}
           <Button
             onClick={handleAceitar}
             disabled={!aceitouTermos || !aceitouPrivacidade || enviando}
