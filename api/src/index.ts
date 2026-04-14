@@ -54,6 +54,8 @@ import { rotasUsuariosSuperadmin } from "./rotas/usuarios-superadmin.js";
 import { iniciarProcessamentoDLQ, obterEstatisticasDLQ } from "./utils/audit-dlq.js";
 import { initSentryBackend, flushSentry, captureException } from "./config/sentry.js";
 import { registrarErrorTrackerHook } from "./middleware/error-tracker.js";
+import { registrarMetricsHook } from "./middleware/metrics-collector.js";
+import { iniciarMotorAlertas } from "./middleware/alert-engine.js";
 
 async function main() {
   // Sentry — inicializar ANTES de tudo
@@ -288,6 +290,13 @@ async function main() {
 
   // ── Error tracker — persistir erros no banco ──
   registrarErrorTrackerHook(app);
+
+  // ── Metrics collector — latência, memória, pool ──
+  registrarMetricsHook(app);
+
+  // ── Motor de alertas — avalia regras a cada 5 min ──
+  const alertTimer = iniciarMotorAlertas(300_000);
+  app.addHook("onClose", async () => clearInterval(alertTimer));
 
   // ── DLQ Metrics (admin only) ──────────────
   app.get("/api/admin/metricas-dlq", {

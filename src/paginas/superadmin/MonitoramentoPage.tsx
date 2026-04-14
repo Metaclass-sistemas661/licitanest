@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { Bug, HeartPulse, BarChart3, FlaskConical } from "lucide-react";
+import { Bug, HeartPulse, BarChart3, FlaskConical, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ErrosTab } from "@/componentes/superadmin/ErrosTab";
 import { SaudeTab } from "@/componentes/superadmin/SaudeTab";
 import { MetricasPerformanceTab } from "@/componentes/superadmin/MetricasPerformanceTab";
 import { TestesTab } from "@/componentes/superadmin/TestesTab";
+import { AlertasTab } from "@/componentes/superadmin/AlertasTab";
 
 const TABS = [
   { id: "erros", label: "Erros", icon: Bug },
   { id: "saude", label: "Saúde", icon: HeartPulse },
   { id: "metricas", label: "Métricas", icon: BarChart3 },
   { id: "testes", label: "Testes", icon: FlaskConical },
+  { id: "alertas", label: "Alertas", icon: Bell },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -51,6 +53,7 @@ export function MonitoramentoPage() {
       {tabAtiva === "saude" && <SaudeTab />}
       {tabAtiva === "metricas" && <MetricasPerformanceTab />}
       {tabAtiva === "testes" && <TestesTab />}
+      {tabAtiva === "alertas" && <AlertasTab />}
     </div>
   );
 }
