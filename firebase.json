@@ -112,6 +112,42 @@
       {
         "source": "/api-publica",
         "destination": "/app.html"
+      },
+      {
+        "source": "/superadmin/**",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/superadmin",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/lgpd",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/checklist-in",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/catmat",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/workflow",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/ia-assistente",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/contratos/**",
+        "destination": "/app.html"
+      },
+      {
+        "source": "/contratos",
+        "destination": "/app.html"
       }
     ],
     "headers": [
