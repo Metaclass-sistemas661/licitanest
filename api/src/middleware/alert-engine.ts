@@ -11,7 +11,7 @@ interface RegraAlerta {
 /**
  * Motor de alertas — avalia regras periodicamente e cria alertas no banco.
  */
-export function iniciarMotorAlertas(intervaloMs = 300_000): NodeJS.Timeout {
+export function iniciarMotorAlertas(intervaloMs = 300_000): ReturnType<typeof setInterval> {
   const timer = setInterval(async () => {
     try {
       await avaliarRegras();
