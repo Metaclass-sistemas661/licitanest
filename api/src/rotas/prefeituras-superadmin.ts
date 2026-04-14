@@ -178,8 +178,13 @@ export async function rotasPrefeiturasSuperadmin(app: FastifyInstance): Promise<
         ),
         pool().query(
           `SELECT
-            (SELECT COUNT(*)::int FROM cestas_precos cp WHERE cp.municipio_id = $1 AND cp.deletado_em IS NULL) AS total_cestas,
-            (SELECT COUNT(*)::int FROM cotacoes cot WHERE cot.municipio_id = $1 AND cot.deletado_em IS NULL) AS total_cotacoes,
+            (SELECT COUNT(*)::int FROM cestas cp
+             JOIN secretarias sec2 ON sec2.id = cp.secretaria_id
+             WHERE sec2.municipio_id = $1 AND cp.deletado_em IS NULL) AS total_cestas,
+            (SELECT COUNT(*)::int FROM cotacoes cot
+             JOIN cestas c2 ON c2.id = cot.cesta_id
+             JOIN secretarias sec3 ON sec3.id = c2.secretaria_id
+             WHERE sec3.municipio_id = $1 AND cot.deletado_em IS NULL) AS total_cotacoes,
             (SELECT MAX(a.criado_em) FROM audit_log a
              JOIN servidores s ON s.id = a.servidor_id
              JOIN secretarias sec ON sec.id = s.secretaria_id

@@ -23,7 +23,7 @@ export async function rotasComparador(app: FastifyInstance) {
         pool.query(
           `SELECT c.id, c.descricao_objeto, c.data, c.status, c.secretaria_id,
                   s.nome AS secretaria_nome
-           FROM cestas_precos c
+           FROM cestas c
            LEFT JOIN secretarias s ON c.secretaria_id = s.id
            WHERE c.id = $1`,
           [cestaA],
@@ -31,7 +31,7 @@ export async function rotasComparador(app: FastifyInstance) {
         pool.query(
           `SELECT c.id, c.descricao_objeto, c.data, c.status, c.secretaria_id,
                   s.nome AS secretaria_nome
-           FROM cestas_precos c
+           FROM cestas c
            LEFT JOIN secretarias s ON c.secretaria_id = s.id
            WHERE c.id = $1`,
           [cestaB],
