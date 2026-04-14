@@ -39,7 +39,7 @@ export async function obterErro(id: string): Promise<{ data: ErroSistema }> {
 }
 
 export async function resolverErro(id: string, notas?: string): Promise<{ data: { resolvido: boolean } }> {
-  return api.put(`/api/superadmin/monitoramento/erros/${id}/resolver`, { notas_resolucao: notas });
+  return api.patch(`/api/superadmin/monitoramento/erros/${id}/resolver`, { notas_resolucao: notas });
 }
 
 // ── Saúde ──────────────────────────────────────────────────
@@ -88,5 +88,5 @@ export async function listarAlertas(naoLidos?: boolean, limit?: number): Promise
 }
 
 export async function marcarAlertaLido(id: string): Promise<void> {
-  await api.put(`/api/superadmin/monitoramento/alertas/${id}/ler`);
+  await api.patch(`/api/superadmin/monitoramento/alertas/${id}/ler`);
 }

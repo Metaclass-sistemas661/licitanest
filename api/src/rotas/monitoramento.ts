@@ -73,27 +73,6 @@ export async function rotasMonitoramento(app: FastifyInstance): Promise<void> {
     preHandler: [verificarAuth, exigirSuperAdmin],
   }, async (_request, reply) => {
     try {
-      const { rows } = await getPool().query(`
-        SELECT
-          COUNT(*) as total,
-          COUNT(*) FILTER (WHERE resolvido = false) as nao_resolvidos,
-          COUNT(*) FILTER (WHERE severidade = 'critical' AND resolvido = false) as criticos,
-          COUNT(*) FILTER (WHERE created_at > now() - INTERVAL '24 hours') as ultimas_24h,
-          json_object_agg(
-            COALESCE(origem, 'desconhecido'),
-            cnt
-          ) as por_origem
-        FROM superadmin.erros_sistema,
-        LATERAL (
-          SELECT origem AS o, COUNT(*) AS cnt
-          FROM superadmin.erros_sistema
-          GROUP BY origem
-        ) sub
-        WHERE sub.o = superadmin.erros_sistema.origem
-        LIMIT 1
-      `);
-
-      // Abordagem mais simples — duas queries
       const totalResult = await getPool().query(`
         SELECT
           COUNT(*) as total,
