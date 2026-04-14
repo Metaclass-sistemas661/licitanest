@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contextos/AuthContexto";
 import { PrivateRoute } from "@/componentes/auth/PrivateRoute";
 import { SuperAdminGuard } from "@/componentes/auth/SuperAdminGuard";
@@ -10,6 +10,7 @@ import { PageLoader } from "@/componentes/ui/page-loader";
 import { ErrorBoundary } from "@/componentes/ui/error-boundary";
 import { PwaInstallBanner, PwaUpdateBanner, OfflineIndicator } from "@/componentes/pwa";
 import { AceiteTermosModal } from "@/componentes/auth/AceiteTermosModal";
+import { useAuth } from "@/hooks/useAuth";
 
 /* ── Enterprise lazy loader with per-chunk retry + cache bust ── */
 async function purgeSwCaches(): Promise<void> {
@@ -112,6 +113,13 @@ const AuditLogPage = lazyRetry(() => import("@/paginas/superadmin/AuditLogPage")
 const ConfiguracoesSuperAdminPage = lazyRetry(() => import("@/paginas/superadmin/ConfiguracoesSuperAdminPage"), "ConfiguracoesSuperAdminPage");
 const MonitoramentoPage = lazyRetry(() => import("@/paginas/superadmin/MonitoramentoPage"), "MonitoramentoPage");
 
+/** Redireciona superadmin para /superadmin, senão mostra Dashboard normal */
+function HomeRedirect() {
+  const { isSuperAdmin } = useAuth();
+  if (isSuperAdmin) return <Navigate to="/superadmin" replace />;
+  return <DashboardPage />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -153,7 +161,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<AppLayout />}>
               {/* Qualquer perfil autenticado */}
-              <Route index element={<DashboardPage />} />
+              <Route index element={<HomeRedirect />} />
               <Route path="catalogo" element={<CatalogoPage />} />
               <Route path="cestas" element={<CestasPage />} />
               <Route path="cestas/nova" element={<WizardNovaCesta />} />
